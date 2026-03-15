@@ -1,0 +1,1 @@
+docker run -d --name product_service_db -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -e POSTGRES_DB=products -p 5432:5432 postgres;
