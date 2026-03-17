@@ -10,12 +10,14 @@ import (
 	"product_service/internal/transport/grpcapi"
 	"product_service/pkg/postgres"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type Application struct {
 	grpcServer *grpc.Server
+	connPool   *pgxpool.Pool
 }
 
 func New() (*Application, error) {
@@ -31,12 +33,13 @@ func New() (*Application, error) {
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
-	router := grpcapi.NewRouter(productService)
+	router := grpcapi.NewHandler(productService)
 
 	pb.RegisterProductServiceServer(grpcServer, router)
 	reflection.Register(grpcServer)
 	a := &Application{
 		grpcServer: grpcServer,
+		connPool:   pool,
 	}
 
 	return a, nil
@@ -61,4 +64,5 @@ func (a *Application) Run(grpcAddress string) error {
 
 func (a *Application) Stop() {
 	a.grpcServer.GracefulStop()
+	a.connPool.Close()
 }

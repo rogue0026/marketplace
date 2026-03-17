@@ -10,19 +10,19 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type GRPCRouter struct {
+type Handler struct {
 	pb.UnimplementedProductServiceServer
 	service *service.ProductService
 }
 
-func NewRouter(s *service.ProductService) *GRPCRouter {
-	server := &GRPCRouter{
+func NewHandler(s *service.ProductService) *Handler {
+	server := &Handler{
 		service: s,
 	}
 	return server
 }
 
-func (s *GRPCRouter) ShowProducts(ctx context.Context, req *pb.ShowProductsRequest) (*pb.ShowProductsResponse, error) {
+func (s *Handler) ShowProducts(ctx context.Context, req *pb.ShowProductsRequest) (*pb.ShowProductsResponse, error) {
 	products, err := s.service.ShowProducts(ctx, req.PageNumber, req.ItemsPerPage)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (s *GRPCRouter) ShowProducts(ctx context.Context, req *pb.ShowProductsReque
 	return resp, nil
 }
 
-func (s *GRPCRouter) AddProducts(ctx context.Context, req *pb.AddProductsRequest) (*emptypb.Empty, error) {
+func (s *Handler) AddProducts(ctx context.Context, req *pb.AddProductsRequest) (*emptypb.Empty, error) {
 	productList := make([]*models.Product, 0, len(req.Products))
 	for _, elem := range req.Products {
 		p := &models.Product{
@@ -67,7 +67,7 @@ func (s *GRPCRouter) AddProducts(ctx context.Context, req *pb.AddProductsRequest
 	return nil, nil
 }
 
-func (s *GRPCRouter) DeleteProducts(ctx context.Context, req *pb.DeleteProductsRequest) (*emptypb.Empty, error) {
+func (s *Handler) DeleteProducts(ctx context.Context, req *pb.DeleteProductsRequest) (*emptypb.Empty, error) {
 	err := s.service.DeleteProduct(ctx, req.ProductId)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (s *GRPCRouter) DeleteProducts(ctx context.Context, req *pb.DeleteProductsR
 	return nil, nil
 }
 
-func (s *GRPCRouter) ToUpProducts(ctx context.Context, req *pb.ToUpProductsRequest) (*emptypb.Empty, error) {
+func (s *Handler) ToUpProducts(ctx context.Context, req *pb.ToUpProductsRequest) (*emptypb.Empty, error) {
 	err := s.service.ToUpProduct(ctx, req.ProductId, req.Quantity)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (s *GRPCRouter) ToUpProducts(ctx context.Context, req *pb.ToUpProductsReque
 	return nil, nil
 }
 
-func (s *GRPCRouter) ToDownProducts(ctx context.Context, req *pb.ToDownProductsRequest) (*emptypb.Empty, error) {
+func (s *Handler) ToDownProducts(ctx context.Context, req *pb.ToDownProductsRequest) (*emptypb.Empty, error) {
 	err := s.service.ToDownProduct(ctx, req.ProductId, req.Quantity)
 	if err != nil {
 		return nil, err

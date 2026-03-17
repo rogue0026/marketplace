@@ -10,19 +10,22 @@ import (
 	"user_service/internal/transport/grpcapi"
 	"user_service/pkg/postgres"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
 )
 
 type Application struct {
 	grpcServer *grpc.Server
+	connPool   *pgxpool.Pool
 }
 
 func New() (*Application, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	p, err := postgres.NewPool(ctx)
 	if err != nil {
 		return nil, err
@@ -44,6 +47,7 @@ func New() (*Application, error) {
 
 	app := &Application{
 		grpcServer: grpcServer,
+		connPool:   p,
 	}
 
 	return app, nil
@@ -67,4 +71,5 @@ func (a *Application) Run(address string) error {
 
 func (a *Application) Stop() {
 	a.grpcServer.GracefulStop()
+	a.connPool.Close()
 }
