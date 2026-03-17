@@ -4,7 +4,7 @@
 // 	protoc        v7.34.0
 // source: product.proto
 
-package product
+package pb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -382,8 +382,7 @@ var File_product_proto protoreflect.FileDescriptor
 
 const file_product_proto_rawDesc = "" +
 	"\n" +
-	"\rproduct.proto\x12\n" +
-	"product.v1\x1a\x1bgoogle/protobuf/empty.proto\"z\n" +
+	"\rproduct.proto\x12\aproduct\x1a\x1bgoogle/protobuf/empty.proto\"z\n" +
 	"\aProduct\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12$\n" +
@@ -392,11 +391,11 @@ const file_product_proto_rawDesc = "" +
 	"\x13ShowProductsRequest\x12\x1f\n" +
 	"\vpage_number\x18\x01 \x01(\x04R\n" +
 	"pageNumber\x12$\n" +
-	"\x0eitems_per_page\x18\x02 \x01(\x04R\fitemsPerPage\"G\n" +
-	"\x14ShowProductsResponse\x12/\n" +
-	"\bproducts\x18\x01 \x03(\v2\x13.product.v1.ProductR\bproducts\"E\n" +
-	"\x12AddProductsRequest\x12/\n" +
-	"\bproducts\x18\x01 \x03(\v2\x13.product.v1.ProductR\bproducts\"6\n" +
+	"\x0eitems_per_page\x18\x02 \x01(\x04R\fitemsPerPage\"D\n" +
+	"\x14ShowProductsResponse\x12,\n" +
+	"\bproducts\x18\x01 \x03(\v2\x10.product.ProductR\bproducts\"B\n" +
+	"\x12AddProductsRequest\x12,\n" +
+	"\bproducts\x18\x01 \x03(\v2\x10.product.ProductR\bproducts\"6\n" +
 	"\x15DeleteProductsRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x04R\tproductId\"P\n" +
@@ -407,13 +406,13 @@ const file_product_proto_rawDesc = "" +
 	"\x15ToDownProductsRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x04R\tproductId\x12\x1a\n" +
-	"\bquantity\x18\x02 \x01(\x04R\bquantity2\x96\x03\n" +
-	"\x0eProductService\x12S\n" +
-	"\fShowProducts\x12\x1f.product.v1.ShowProductsRequest\x1a .product.v1.ShowProductsResponse\"\x00\x12G\n" +
-	"\vAddProducts\x12\x1e.product.v1.AddProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12L\n" +
-	"\rDeleteProduct\x12!.product.v1.DeleteProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12I\n" +
-	"\fToUpProducts\x12\x1f.product.v1.ToUpProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12M\n" +
-	"\x0eToDownProducts\x12!.product.v1.ToDownProductsRequest\x1a\x16.google.protobuf.Empty\"\x00B\x1dZ\x1bproduct_service/api/productb\x06proto3"
+	"\bquantity\x18\x02 \x01(\x04R\bquantity2\x84\x03\n" +
+	"\x0eProductService\x12M\n" +
+	"\fShowProducts\x12\x1c.product.ShowProductsRequest\x1a\x1d.product.ShowProductsResponse\"\x00\x12D\n" +
+	"\vAddProducts\x12\x1b.product.AddProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12I\n" +
+	"\rDeleteProduct\x12\x1e.product.DeleteProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12F\n" +
+	"\fToUpProducts\x12\x1c.product.ToUpProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12J\n" +
+	"\x0eToDownProducts\x12\x1e.product.ToDownProductsRequest\x1a\x16.google.protobuf.Empty\"\x00B\x18Z\x16product_service/api/pbb\x06proto3"
 
 var (
 	file_product_proto_rawDescOnce sync.Once
@@ -429,28 +428,28 @@ func file_product_proto_rawDescGZIP() []byte {
 
 var file_product_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_product_proto_goTypes = []any{
-	(*Product)(nil),               // 0: product.v1.Product
-	(*ShowProductsRequest)(nil),   // 1: product.v1.ShowProductsRequest
-	(*ShowProductsResponse)(nil),  // 2: product.v1.ShowProductsResponse
-	(*AddProductsRequest)(nil),    // 3: product.v1.AddProductsRequest
-	(*DeleteProductsRequest)(nil), // 4: product.v1.DeleteProductsRequest
-	(*ToUpProductsRequest)(nil),   // 5: product.v1.ToUpProductsRequest
-	(*ToDownProductsRequest)(nil), // 6: product.v1.ToDownProductsRequest
+	(*Product)(nil),               // 0: product.Product
+	(*ShowProductsRequest)(nil),   // 1: product.ShowProductsRequest
+	(*ShowProductsResponse)(nil),  // 2: product.ShowProductsResponse
+	(*AddProductsRequest)(nil),    // 3: product.AddProductsRequest
+	(*DeleteProductsRequest)(nil), // 4: product.DeleteProductsRequest
+	(*ToUpProductsRequest)(nil),   // 5: product.ToUpProductsRequest
+	(*ToDownProductsRequest)(nil), // 6: product.ToDownProductsRequest
 	(*emptypb.Empty)(nil),         // 7: google.protobuf.Empty
 }
 var file_product_proto_depIdxs = []int32{
-	0, // 0: product.v1.ShowProductsResponse.products:type_name -> product.v1.Product
-	0, // 1: product.v1.AddProductsRequest.products:type_name -> product.v1.Product
-	1, // 2: product.v1.ProductService.ShowProducts:input_type -> product.v1.ShowProductsRequest
-	3, // 3: product.v1.ProductService.AddProducts:input_type -> product.v1.AddProductsRequest
-	4, // 4: product.v1.ProductService.DeleteProduct:input_type -> product.v1.DeleteProductsRequest
-	5, // 5: product.v1.ProductService.ToUpProducts:input_type -> product.v1.ToUpProductsRequest
-	6, // 6: product.v1.ProductService.ToDownProducts:input_type -> product.v1.ToDownProductsRequest
-	2, // 7: product.v1.ProductService.ShowProducts:output_type -> product.v1.ShowProductsResponse
-	7, // 8: product.v1.ProductService.AddProducts:output_type -> google.protobuf.Empty
-	7, // 9: product.v1.ProductService.DeleteProduct:output_type -> google.protobuf.Empty
-	7, // 10: product.v1.ProductService.ToUpProducts:output_type -> google.protobuf.Empty
-	7, // 11: product.v1.ProductService.ToDownProducts:output_type -> google.protobuf.Empty
+	0, // 0: product.ShowProductsResponse.products:type_name -> product.Product
+	0, // 1: product.AddProductsRequest.products:type_name -> product.Product
+	1, // 2: product.ProductService.ShowProducts:input_type -> product.ShowProductsRequest
+	3, // 3: product.ProductService.AddProducts:input_type -> product.AddProductsRequest
+	4, // 4: product.ProductService.DeleteProduct:input_type -> product.DeleteProductsRequest
+	5, // 5: product.ProductService.ToUpProducts:input_type -> product.ToUpProductsRequest
+	6, // 6: product.ProductService.ToDownProducts:input_type -> product.ToDownProductsRequest
+	2, // 7: product.ProductService.ShowProducts:output_type -> product.ShowProductsResponse
+	7, // 8: product.ProductService.AddProducts:output_type -> google.protobuf.Empty
+	7, // 9: product.ProductService.DeleteProduct:output_type -> google.protobuf.Empty
+	7, // 10: product.ProductService.ToUpProducts:output_type -> google.protobuf.Empty
+	7, // 11: product.ProductService.ToDownProducts:output_type -> google.protobuf.Empty
 	7, // [7:12] is the sub-list for method output_type
 	2, // [2:7] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

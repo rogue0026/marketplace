@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"net"
-	pb "product_service/api/product/v1"
+	"product_service/api/pb"
 	"product_service/internal/service"
 	"product_service/internal/storage/products/pg"
 	"product_service/internal/transport/grpcapi"

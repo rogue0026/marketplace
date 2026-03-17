@@ -4,7 +4,7 @@
 // - protoc             v7.34.0
 // source: product.proto
 
-package product
+package pb
 
 import (
 	context "context"
@@ -20,11 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProductService_ShowProducts_FullMethodName   = "/product.v1.ProductService/ShowProducts"
-	ProductService_AddProducts_FullMethodName    = "/product.v1.ProductService/AddProducts"
-	ProductService_DeleteProduct_FullMethodName  = "/product.v1.ProductService/DeleteProduct"
-	ProductService_ToUpProducts_FullMethodName   = "/product.v1.ProductService/ToUpProducts"
-	ProductService_ToDownProducts_FullMethodName = "/product.v1.ProductService/ToDownProducts"
+	ProductService_ShowProducts_FullMethodName   = "/product.ProductService/ShowProducts"
+	ProductService_AddProducts_FullMethodName    = "/product.ProductService/AddProducts"
+	ProductService_DeleteProduct_FullMethodName  = "/product.ProductService/DeleteProduct"
+	ProductService_ToUpProducts_FullMethodName   = "/product.ProductService/ToUpProducts"
+	ProductService_ToDownProducts_FullMethodName = "/product.ProductService/ToDownProducts"
 )
 
 // ProductServiceClient is the client API for ProductService service.
@@ -245,7 +245,7 @@ func _ProductService_ToDownProducts_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ProductService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "product.v1.ProductService",
+	ServiceName: "product.ProductService",
 	HandlerType: (*ProductServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

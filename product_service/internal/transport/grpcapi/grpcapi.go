@@ -2,11 +2,12 @@ package grpcapi
 
 import (
 	"context"
-	_ "google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/types/known/emptypb"
-	pb "product_service/api/product/v1"
+	"product_service/api/pb"
 	"product_service/internal/models"
 	"product_service/internal/service"
+
+	_ "google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type GRPCRouter struct {
