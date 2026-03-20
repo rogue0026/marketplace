@@ -17,16 +17,16 @@ import (
 type Application struct {
 	grpcServer *grpc.Server
 	connPool   *pgxpool.Pool
+	Cfg        *Config
 }
 
-func New() (*Application, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func New(cfg *Config) (*Application, error) {
+	ctx := context.Background()
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 
-	p, err := postgres.NewPool(ctx)
+	p, err := postgres.NewPool(ctx, cfg.DatabaseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -48,13 +48,14 @@ func New() (*Application, error) {
 	app := &Application{
 		grpcServer: grpcServer,
 		connPool:   p,
+		Cfg:        cfg,
 	}
 
 	return app, nil
 }
 
-func (a *Application) Run(address string) error {
-	listener, err := net.Listen("tcp", address)
+func (a *Application) Run() error {
+	listener, err := net.Listen("tcp", a.Cfg.GRPCServerAddr)
 	if err != nil {
 		return err
 	}

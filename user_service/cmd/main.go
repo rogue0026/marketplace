@@ -5,25 +5,38 @@ import (
 	"os"
 	"os/signal"
 	"user_service/application"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	_ = os.Setenv("DATABASE_URL", "postgresql://user:password@localhost:5431/products")
-	app, err := application.New()
+	err := godotenv.Load()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = app.Run(":50052")
+	appCfg, err := application.LoadConfig()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	app, err := application.New(appCfg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = app.Run(app.Cfg.GRPCServerAddr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("user service started")
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
-	fmt.Println("user service started")
 	<-stop
 	app.Stop()
 	fmt.Println("user service stopped")

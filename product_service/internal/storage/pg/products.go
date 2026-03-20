@@ -7,19 +7,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type ProductsRepository struct {
+type ProductsRepo struct {
 	pool *pgxpool.Pool
 }
 
-func NewProductsRepository(pool *pgxpool.Pool) *ProductsRepository {
-	pr := &ProductsRepository{
+func NewProductsRepo(pool *pgxpool.Pool) *ProductsRepo {
+	r := &ProductsRepo{
 		pool: pool,
 	}
 
-	return pr
+	return r
 }
 
-func (r *ProductsRepository) AddProducts(ctx context.Context, products ...*models.Product) error {
+func (r *ProductsRepo) AddProducts(ctx context.Context, products ...*models.Product) error {
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func (r *ProductsRepository) AddProducts(ctx context.Context, products ...*model
 	return nil
 }
 
-func (r *ProductsRepository) GetProducts(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error) {
+func (r *ProductsRepo) GetProducts(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error) {
 	sqlQuery := `
         SELECT id, name, price_per_unit, total_quantity
         FROM products
@@ -87,7 +87,7 @@ func (r *ProductsRepository) GetProducts(ctx context.Context, pageNumber uint64,
 	return products, nil
 }
 
-func (r *ProductsRepository) ToUpProductQuantity(ctx context.Context, productId uint64, quantity uint64) error {
+func (r *ProductsRepo) ToUpProductQuantity(ctx context.Context, productId uint64, quantity uint64) error {
 	sqlQuery := `
 		UPDATE products
 		SET total_quantity = total_quantity + $1
@@ -101,7 +101,7 @@ func (r *ProductsRepository) ToUpProductQuantity(ctx context.Context, productId 
 	return nil
 }
 
-func (r *ProductsRepository) ToDownProductQuantity(ctx context.Context, productId uint64, quantity uint64) error {
+func (r *ProductsRepo) ToDownProductQuantity(ctx context.Context, productId uint64, quantity uint64) error {
 	sqlQuery := `
 		UPDATE products
 		SET total_quantity = total_quantity - $1
@@ -115,7 +115,7 @@ func (r *ProductsRepository) ToDownProductQuantity(ctx context.Context, productI
 	return nil
 }
 
-func (r *ProductsRepository) DeleteProduct(ctx context.Context, productId uint64) error {
+func (r *ProductsRepo) DeleteProduct(ctx context.Context, productId uint64) error {
 	sqlQuery := `
 		DELETE FROM products
 		WHERE id = $1;

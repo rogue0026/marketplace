@@ -2,60 +2,63 @@ package application
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"net"
 	"product_service/api/pb"
 	"product_service/internal/service"
-	"product_service/internal/storage/products/pg"
+	"product_service/internal/storage/pg"
 	"product_service/internal/transport/grpcapi"
 	"product_service/pkg/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 type Application struct {
 	grpcServer *grpc.Server
 	connPool   *pgxpool.Pool
+	Cfg        *Config
 }
 
-func New() (*Application, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func New(cfg *Config) (*Application, error) {
+	ctx := context.Background()
 
-	pool, err := postgres.NewPool(ctx)
+	pool, err := postgres.NewPool(ctx, cfg.DatabaseURL)
 	if err != nil {
 		return nil, err
 	}
-	productsRepo := pg.NewProductsRepository(pool)
+
+	productsRepo := pg.NewProductsRepo(pool)
+
 	productService := service.NewProductService(productsRepo)
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
-	router := grpcapi.NewHandler(productService)
 
-	pb.RegisterProductServiceServer(grpcServer, router)
-	reflection.Register(grpcServer)
+	h := grpcapi.NewHandler(productService)
+
+	pb.RegisterProductServiceServer(grpcServer, h)
+
 	a := &Application{
 		grpcServer: grpcServer,
 		connPool:   pool,
+		Cfg:        cfg,
 	}
 
 	return a, nil
 }
 
-func (a *Application) Run(grpcAddress string) error {
-	listener, err := net.Listen("tcp", grpcAddress)
+func (a *Application) Run() error {
+	listener, err := net.Listen("tcp", a.Cfg.GRPCServerAddr)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		log.Printf("starting grpc server on %s\n", grpcAddress)
 		err := a.grpcServer.Serve(listener)
 		if err != nil {
-			log.Println(err.Error())
+			fmt.Println(err)
+			return
 		}
 	}()
 

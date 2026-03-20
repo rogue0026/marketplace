@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "order_service/api/pb";
+
