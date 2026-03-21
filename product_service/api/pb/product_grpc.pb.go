@@ -20,11 +20,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProductService_ShowProducts_FullMethodName   = "/product.ProductService/ShowProducts"
-	ProductService_AddProducts_FullMethodName    = "/product.ProductService/AddProducts"
-	ProductService_DeleteProduct_FullMethodName  = "/product.ProductService/DeleteProduct"
-	ProductService_ToUpProducts_FullMethodName   = "/product.ProductService/ToUpProducts"
-	ProductService_ToDownProducts_FullMethodName = "/product.ProductService/ToDownProducts"
+	ProductService_ShowProducts_FullMethodName    = "/product.ProductService/ShowProducts"
+	ProductService_AddProducts_FullMethodName     = "/product.ProductService/AddProducts"
+	ProductService_DeleteProduct_FullMethodName   = "/product.ProductService/DeleteProduct"
+	ProductService_ToUpProducts_FullMethodName    = "/product.ProductService/ToUpProducts"
+	ProductService_ToDownProducts_FullMethodName  = "/product.ProductService/ToDownProducts"
+	ProductService_ReserveProducts_FullMethodName = "/product.ProductService/ReserveProducts"
 )
 
 // ProductServiceClient is the client API for ProductService service.
@@ -36,6 +37,7 @@ type ProductServiceClient interface {
 	DeleteProduct(ctx context.Context, in *DeleteProductsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ToUpProducts(ctx context.Context, in *ToUpProductsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ToDownProducts(ctx context.Context, in *ToDownProductsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ReserveProducts(ctx context.Context, in *ReserveProductsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type productServiceClient struct {
@@ -96,6 +98,16 @@ func (c *productServiceClient) ToDownProducts(ctx context.Context, in *ToDownPro
 	return out, nil
 }
 
+func (c *productServiceClient) ReserveProducts(ctx context.Context, in *ReserveProductsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ProductService_ReserveProducts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProductServiceServer is the server API for ProductService service.
 // All implementations must embed UnimplementedProductServiceServer
 // for forward compatibility.
@@ -105,6 +117,7 @@ type ProductServiceServer interface {
 	DeleteProduct(context.Context, *DeleteProductsRequest) (*emptypb.Empty, error)
 	ToUpProducts(context.Context, *ToUpProductsRequest) (*emptypb.Empty, error)
 	ToDownProducts(context.Context, *ToDownProductsRequest) (*emptypb.Empty, error)
+	ReserveProducts(context.Context, *ReserveProductsRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedProductServiceServer()
 }
 
@@ -129,6 +142,9 @@ func (UnimplementedProductServiceServer) ToUpProducts(context.Context, *ToUpProd
 }
 func (UnimplementedProductServiceServer) ToDownProducts(context.Context, *ToDownProductsRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method ToDownProducts not implemented")
+}
+func (UnimplementedProductServiceServer) ReserveProducts(context.Context, *ReserveProductsRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReserveProducts not implemented")
 }
 func (UnimplementedProductServiceServer) mustEmbedUnimplementedProductServiceServer() {}
 func (UnimplementedProductServiceServer) testEmbeddedByValue()                        {}
@@ -241,6 +257,24 @@ func _ProductService_ToDownProducts_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProductService_ReserveProducts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReserveProductsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductServiceServer).ReserveProducts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProductService_ReserveProducts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductServiceServer).ReserveProducts(ctx, req.(*ReserveProductsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProductService_ServiceDesc is the grpc.ServiceDesc for ProductService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -267,6 +301,10 @@ var ProductService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ToDownProducts",
 			Handler:    _ProductService_ToDownProducts_Handler,
+		},
+		{
+			MethodName: "ReserveProducts",
+			Handler:    _ProductService_ReserveProducts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -10,6 +10,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -378,11 +379,131 @@ func (x *ToDownProductsRequest) GetQuantity() uint64 {
 	return 0
 }
 
+type Reservation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       uint64                 `protobuf:"varint,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	ProductId     uint64                 `protobuf:"varint,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	Quantity      uint64                 `protobuf:"varint,3,opt,name=quantity,proto3" json:"quantity,omitempty"`
+	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Reservation) Reset() {
+	*x = Reservation{}
+	mi := &file_product_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Reservation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Reservation) ProtoMessage() {}
+
+func (x *Reservation) ProtoReflect() protoreflect.Message {
+	mi := &file_product_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Reservation.ProtoReflect.Descriptor instead.
+func (*Reservation) Descriptor() ([]byte, []int) {
+	return file_product_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *Reservation) GetOrderId() uint64 {
+	if x != nil {
+		return x.OrderId
+	}
+	return 0
+}
+
+func (x *Reservation) GetProductId() uint64 {
+	if x != nil {
+		return x.ProductId
+	}
+	return 0
+}
+
+func (x *Reservation) GetQuantity() uint64 {
+	if x != nil {
+		return x.Quantity
+	}
+	return 0
+}
+
+func (x *Reservation) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *Reservation) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
+type ReserveProductsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Reservations  []*Reservation         `protobuf:"bytes,1,rep,name=reservations,proto3" json:"reservations,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReserveProductsRequest) Reset() {
+	*x = ReserveProductsRequest{}
+	mi := &file_product_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReserveProductsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReserveProductsRequest) ProtoMessage() {}
+
+func (x *ReserveProductsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_product_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReserveProductsRequest.ProtoReflect.Descriptor instead.
+func (*ReserveProductsRequest) Descriptor() ([]byte, []int) {
+	return file_product_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ReserveProductsRequest) GetReservations() []*Reservation {
+	if x != nil {
+		return x.Reservations
+	}
+	return nil
+}
+
 var File_product_proto protoreflect.FileDescriptor
 
 const file_product_proto_rawDesc = "" +
 	"\n" +
-	"\rproduct.proto\x12\aproduct\x1a\x1bgoogle/protobuf/empty.proto\"z\n" +
+	"\rproduct.proto\x12\aproduct\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"z\n" +
 	"\aProduct\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12$\n" +
@@ -406,13 +527,24 @@ const file_product_proto_rawDesc = "" +
 	"\x15ToDownProductsRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\x04R\tproductId\x12\x1a\n" +
-	"\bquantity\x18\x02 \x01(\x04R\bquantity2\x84\x03\n" +
+	"\bquantity\x18\x02 \x01(\x04R\bquantity\"\xb6\x01\n" +
+	"\vReservation\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\x04R\aorderId\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x02 \x01(\x04R\tproductId\x12\x1a\n" +
+	"\bquantity\x18\x03 \x01(\x04R\bquantity\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\x129\n" +
+	"\n" +
+	"expires_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"R\n" +
+	"\x16ReserveProductsRequest\x128\n" +
+	"\freservations\x18\x01 \x03(\v2\x14.product.ReservationR\freservations2\xd2\x03\n" +
 	"\x0eProductService\x12M\n" +
 	"\fShowProducts\x12\x1c.product.ShowProductsRequest\x1a\x1d.product.ShowProductsResponse\"\x00\x12D\n" +
 	"\vAddProducts\x12\x1b.product.AddProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12I\n" +
 	"\rDeleteProduct\x12\x1e.product.DeleteProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12F\n" +
 	"\fToUpProducts\x12\x1c.product.ToUpProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12J\n" +
-	"\x0eToDownProducts\x12\x1e.product.ToDownProductsRequest\x1a\x16.google.protobuf.Empty\"\x00B\x18Z\x16product_service/api/pbb\x06proto3"
+	"\x0eToDownProducts\x12\x1e.product.ToDownProductsRequest\x1a\x16.google.protobuf.Empty\"\x00\x12L\n" +
+	"\x0fReserveProducts\x12\x1f.product.ReserveProductsRequest\x1a\x16.google.protobuf.Empty\"\x00B\x18Z\x16product_service/api/pbb\x06proto3"
 
 var (
 	file_product_proto_rawDescOnce sync.Once
@@ -426,35 +558,42 @@ func file_product_proto_rawDescGZIP() []byte {
 	return file_product_proto_rawDescData
 }
 
-var file_product_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_product_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_product_proto_goTypes = []any{
-	(*Product)(nil),               // 0: product.Product
-	(*ShowProductsRequest)(nil),   // 1: product.ShowProductsRequest
-	(*ShowProductsResponse)(nil),  // 2: product.ShowProductsResponse
-	(*AddProductsRequest)(nil),    // 3: product.AddProductsRequest
-	(*DeleteProductsRequest)(nil), // 4: product.DeleteProductsRequest
-	(*ToUpProductsRequest)(nil),   // 5: product.ToUpProductsRequest
-	(*ToDownProductsRequest)(nil), // 6: product.ToDownProductsRequest
-	(*emptypb.Empty)(nil),         // 7: google.protobuf.Empty
+	(*Product)(nil),                // 0: product.Product
+	(*ShowProductsRequest)(nil),    // 1: product.ShowProductsRequest
+	(*ShowProductsResponse)(nil),   // 2: product.ShowProductsResponse
+	(*AddProductsRequest)(nil),     // 3: product.AddProductsRequest
+	(*DeleteProductsRequest)(nil),  // 4: product.DeleteProductsRequest
+	(*ToUpProductsRequest)(nil),    // 5: product.ToUpProductsRequest
+	(*ToDownProductsRequest)(nil),  // 6: product.ToDownProductsRequest
+	(*Reservation)(nil),            // 7: product.Reservation
+	(*ReserveProductsRequest)(nil), // 8: product.ReserveProductsRequest
+	(*timestamppb.Timestamp)(nil),  // 9: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),          // 10: google.protobuf.Empty
 }
 var file_product_proto_depIdxs = []int32{
-	0, // 0: product.ShowProductsResponse.products:type_name -> product.Product
-	0, // 1: product.AddProductsRequest.products:type_name -> product.Product
-	1, // 2: product.ProductService.ShowProducts:input_type -> product.ShowProductsRequest
-	3, // 3: product.ProductService.AddProducts:input_type -> product.AddProductsRequest
-	4, // 4: product.ProductService.DeleteProduct:input_type -> product.DeleteProductsRequest
-	5, // 5: product.ProductService.ToUpProducts:input_type -> product.ToUpProductsRequest
-	6, // 6: product.ProductService.ToDownProducts:input_type -> product.ToDownProductsRequest
-	2, // 7: product.ProductService.ShowProducts:output_type -> product.ShowProductsResponse
-	7, // 8: product.ProductService.AddProducts:output_type -> google.protobuf.Empty
-	7, // 9: product.ProductService.DeleteProduct:output_type -> google.protobuf.Empty
-	7, // 10: product.ProductService.ToUpProducts:output_type -> google.protobuf.Empty
-	7, // 11: product.ProductService.ToDownProducts:output_type -> google.protobuf.Empty
-	7, // [7:12] is the sub-list for method output_type
-	2, // [2:7] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0,  // 0: product.ShowProductsResponse.products:type_name -> product.Product
+	0,  // 1: product.AddProductsRequest.products:type_name -> product.Product
+	9,  // 2: product.Reservation.expires_at:type_name -> google.protobuf.Timestamp
+	7,  // 3: product.ReserveProductsRequest.reservations:type_name -> product.Reservation
+	1,  // 4: product.ProductService.ShowProducts:input_type -> product.ShowProductsRequest
+	3,  // 5: product.ProductService.AddProducts:input_type -> product.AddProductsRequest
+	4,  // 6: product.ProductService.DeleteProduct:input_type -> product.DeleteProductsRequest
+	5,  // 7: product.ProductService.ToUpProducts:input_type -> product.ToUpProductsRequest
+	6,  // 8: product.ProductService.ToDownProducts:input_type -> product.ToDownProductsRequest
+	8,  // 9: product.ProductService.ReserveProducts:input_type -> product.ReserveProductsRequest
+	2,  // 10: product.ProductService.ShowProducts:output_type -> product.ShowProductsResponse
+	10, // 11: product.ProductService.AddProducts:output_type -> google.protobuf.Empty
+	10, // 12: product.ProductService.DeleteProduct:output_type -> google.protobuf.Empty
+	10, // 13: product.ProductService.ToUpProducts:output_type -> google.protobuf.Empty
+	10, // 14: product.ProductService.ToDownProducts:output_type -> google.protobuf.Empty
+	10, // 15: product.ProductService.ReserveProducts:output_type -> google.protobuf.Empty
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_product_proto_init() }
@@ -468,7 +607,7 @@ func file_product_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_product_proto_rawDesc), len(file_product_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

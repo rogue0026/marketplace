@@ -28,9 +28,8 @@ func New(cfg *Config) (*Application, error) {
 		return nil, err
 	}
 
-	productsRepo := pg.NewProductsRepo(pool)
-
-	productService := service.NewProductService(productsRepo)
+	products := pg.NewProductsRepo(pool)
+	productService := service.NewProductService(products)
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)

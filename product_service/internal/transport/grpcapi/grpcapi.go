@@ -6,7 +6,6 @@ import (
 	"product_service/internal/models"
 	"product_service/internal/service"
 
-	_ "google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -87,6 +86,27 @@ func (s *Handler) ToUpProducts(ctx context.Context, req *pb.ToUpProductsRequest)
 
 func (s *Handler) ToDownProducts(ctx context.Context, req *pb.ToDownProductsRequest) (*emptypb.Empty, error) {
 	err := s.service.ToDownProduct(ctx, req.ProductId, req.Quantity)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (s *Handler) ReserveProducts(ctx context.Context, req *pb.ReserveProductsRequest) (*emptypb.Empty, error) {
+	reservations := make([]*models.Reservation, 0)
+	for _, elem := range req.Reservations {
+		r := &models.Reservation{
+			OrderId:   elem.OrderId,
+			ProductId: elem.ProductId,
+			Quantity:  elem.Quantity,
+			Status:    int(elem.Status),
+			ExpiresAt: elem.ExpiresAt.AsTime(),
+		}
+		reservations = append(reservations, r)
+	}
+
+	err := s.service.ReserveProducts(ctx, reservations)
 	if err != nil {
 		return nil, err
 	}

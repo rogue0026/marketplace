@@ -7,6 +7,41 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const (
+	AddProductsQuery = `
+	INSERT INTO products (name, price_per_unit, total_quantity)
+    VALUES ($1, $2, $3)
+    `
+
+	GetProductsQuery = `
+    SELECT 
+        id,
+        name,
+        price_per_unit,
+        total_quantity
+    FROM products
+    ORDER BY id
+    LIMIT $1 OFFSET $2
+    `
+
+	ToUpProductsQuantityQuery = `
+	UPDATE products
+	SET total_quantity = total_quantity + $1
+	WHERE id = $2
+	`
+
+	ToDownProductsQuantityQuery = `
+	UPDATE products
+	SET total_quantity = total_quantity - $1
+	WHERE id = $2
+	`
+
+	DeleteProductQuery = `
+		DELETE FROM products
+		WHERE id = $1;
+	`
+)
+
 type ProductsRepo struct {
 	pool *pgxpool.Pool
 }
@@ -26,15 +61,10 @@ func (r *ProductsRepo) AddProducts(ctx context.Context, products ...*models.Prod
 	}
 	defer tx.Rollback(ctx)
 
-	query := `
-        INSERT INTO products (name, price_per_unit, total_quantity)
-        VALUES ($1, $2, $3)
-    `
-
 	for _, p := range products {
 		_, err := tx.Exec(
 			ctx,
-			query,
+			AddProductsQuery,
 			p.Name,
 			p.PricePerUnit,
 			p.TotalQuantity,
@@ -52,15 +82,8 @@ func (r *ProductsRepo) AddProducts(ctx context.Context, products ...*models.Prod
 }
 
 func (r *ProductsRepo) GetProducts(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error) {
-	sqlQuery := `
-        SELECT id, name, price_per_unit, total_quantity
-        FROM products
-        ORDER BY id
-        LIMIT $1 OFFSET $2
-    `
-
 	offset := (pageNumber - 1) * itemsPerPage
-	rows, err := r.pool.Query(ctx, sqlQuery, itemsPerPage, offset)
+	rows, err := r.pool.Query(ctx, GetProductsQuery, itemsPerPage, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -88,13 +111,7 @@ func (r *ProductsRepo) GetProducts(ctx context.Context, pageNumber uint64, items
 }
 
 func (r *ProductsRepo) ToUpProductQuantity(ctx context.Context, productId uint64, quantity uint64) error {
-	sqlQuery := `
-		UPDATE products
-		SET total_quantity = total_quantity + $1
-		WHERE id = $2
-	`
-
-	if _, err := r.pool.Exec(ctx, sqlQuery, quantity, productId); err != nil {
+	if _, err := r.pool.Exec(ctx, ToUpProductsQuantityQuery, quantity, productId); err != nil {
 		return err
 	}
 
@@ -102,13 +119,7 @@ func (r *ProductsRepo) ToUpProductQuantity(ctx context.Context, productId uint64
 }
 
 func (r *ProductsRepo) ToDownProductQuantity(ctx context.Context, productId uint64, quantity uint64) error {
-	sqlQuery := `
-		UPDATE products
-		SET total_quantity = total_quantity - $1
-		WHERE id = $2
-	`
-
-	if _, err := r.pool.Exec(ctx, sqlQuery, quantity, productId); err != nil {
+	if _, err := r.pool.Exec(ctx, ToDownProductsQuantityQuery, quantity, productId); err != nil {
 		return err
 	}
 
@@ -116,12 +127,7 @@ func (r *ProductsRepo) ToDownProductQuantity(ctx context.Context, productId uint
 }
 
 func (r *ProductsRepo) DeleteProduct(ctx context.Context, productId uint64) error {
-	sqlQuery := `
-		DELETE FROM products
-		WHERE id = $1;
-	`
-
-	if _, err := r.pool.Exec(ctx, sqlQuery, productId); err != nil {
+	if _, err := r.pool.Exec(ctx, DeleteProductQuery, productId); err != nil {
 		return err
 	}
 

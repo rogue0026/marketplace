@@ -13,20 +13,27 @@ type ProductsRepository interface {
 	DeleteProduct(ctx context.Context, productId uint64) error
 }
 
-type ProductService struct {
-	Repository ProductsRepository
+type ReservationsRepository interface {
+	CreateProductReservations(ctx context.Context, reservations []*models.Reservation) error
+	CleanExpiredReservations(ctx context.Context) error
 }
 
-func NewProductService(repo ProductsRepository) *ProductService {
+type ProductService struct {
+	Products     ProductsRepository
+	Reservations ReservationsRepository
+}
+
+func NewProductService(products ProductsRepository, reservations ReservationsRepository) *ProductService {
 	ps := &ProductService{
-		Repository: repo,
+		Products:     products,
+		Reservations: reservations,
 	}
 
 	return ps
 }
 
 func (ps *ProductService) ShowProducts(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error) {
-	products, err := ps.Repository.GetProducts(ctx, pageNumber, itemsPerPage)
+	products, err := ps.Products.GetProducts(ctx, pageNumber, itemsPerPage)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +42,7 @@ func (ps *ProductService) ShowProducts(ctx context.Context, pageNumber uint64, i
 }
 
 func (ps *ProductService) AddProducts(ctx context.Context, productsList []*models.Product) error {
-	err := ps.Repository.AddProducts(ctx, productsList...)
+	err := ps.Products.AddProducts(ctx, productsList...)
 	if err != nil {
 		return err
 	}
@@ -44,7 +51,7 @@ func (ps *ProductService) AddProducts(ctx context.Context, productsList []*model
 }
 
 func (ps *ProductService) DeleteProduct(ctx context.Context, productId uint64) error {
-	err := ps.Repository.DeleteProduct(ctx, productId)
+	err := ps.Products.DeleteProduct(ctx, productId)
 	if err != nil {
 		return err
 	}
@@ -53,7 +60,7 @@ func (ps *ProductService) DeleteProduct(ctx context.Context, productId uint64) e
 }
 
 func (ps *ProductService) ToUpProduct(ctx context.Context, productId uint64, quantity uint64) error {
-	err := ps.Repository.ToUpProductQuantity(ctx, productId, quantity)
+	err := ps.Products.ToUpProductQuantity(ctx, productId, quantity)
 	if err != nil {
 		return err
 	}
@@ -62,7 +69,25 @@ func (ps *ProductService) ToUpProduct(ctx context.Context, productId uint64, qua
 }
 
 func (ps *ProductService) ToDownProduct(ctx context.Context, productId, quantity uint64) error {
-	err := ps.Repository.ToDownProductQuantity(ctx, productId, quantity)
+	err := ps.Products.ToDownProductQuantity(ctx, productId, quantity)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ps *ProductService) ReserveProducts(ctx context.Context, reservations []*models.Reservation) error {
+	err := ps.Reservations.CreateProductReservations(ctx, reservations)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ps *ProductService) CleanExpiredReservations(ctx context.Context) error {
+	err := ps.Reservations.CleanExpiredReservations(ctx)
 	if err != nil {
 		return err
 	}

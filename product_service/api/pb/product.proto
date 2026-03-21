@@ -5,6 +5,7 @@ package product;
 option go_package = "product_service/api/pb";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 message Product {
   uint64 id = 1;
@@ -40,10 +41,23 @@ message ToDownProductsRequest {
   uint64 quantity = 2;
 }
 
+message Reservation {
+  uint64 order_id = 1;
+  uint64 product_id = 2;
+  uint64 quantity = 3;
+  int32 status = 4;
+  google.protobuf.Timestamp expires_at = 5;
+}
+
+message ReserveProductsRequest {
+  repeated Reservation reservations = 1;
+}
+
 service ProductService {
   rpc ShowProducts(ShowProductsRequest) returns (ShowProductsResponse) {}
   rpc AddProducts(AddProductsRequest) returns (google.protobuf.Empty) {}
   rpc DeleteProduct(DeleteProductsRequest) returns (google.protobuf.Empty) {}
   rpc ToUpProducts(ToUpProductsRequest) returns (google.protobuf.Empty) {}
   rpc ToDownProducts(ToDownProductsRequest) returns (google.protobuf.Empty) {}
+  rpc ReserveProducts(ReserveProductsRequest) returns (google.protobuf.Empty) {}
 }

@@ -4,3 +4,8 @@ package order;
 
 option go_package = "order_service/api/pb";
 
+import "google/protobuf/empty.proto";
+
+message CreateOrderRequest {
+
+}
