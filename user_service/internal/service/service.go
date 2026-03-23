@@ -76,6 +76,15 @@ func (s *UserService) DeleteProductFromBasket(ctx context.Context, userId uint64
 	return nil
 }
 
+func (s *UserService) ClearUserBasket(ctx context.Context, userId uint64) error {
+	err := s.baskets.ClearUserBasket(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *UserService) ToUpBalance(ctx context.Context, userId uint64, amount uint64) error {
 	err := s.wallets.AddMoney(ctx, userId, amount)
 	if err != nil {

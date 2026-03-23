@@ -27,6 +27,11 @@ const (
 	    current_price
 	FROM basket_content
 	WHERE user_id = $1`
+
+	ClearUserBasketQuery = `
+	DELETE FROM basket_content
+	WHERE user_id = $1
+	`
 )
 
 type BasketsRepo struct {
@@ -105,4 +110,13 @@ func (repo *BasketsRepo) GetUserBasket(ctx context.Context, userId uint64) (*mod
 	}
 
 	return basket, nil
+}
+
+func (repo *BasketsRepo) ClearUserBasket(ctx context.Context, userId uint64) error {
+	_, err := repo.pool.Exec(ctx, ClearUserBasketQuery, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
