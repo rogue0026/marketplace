@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type Product struct {
 	Id             uint64 `json:"id"`
 	Name           string `json:"name"`
@@ -10,10 +8,8 @@ type Product struct {
 }
 
 type Reservation struct {
-	Id        uint64    `json:"id"`
-	OrderId   uint64    `json:"order_id"`
-	ProductId uint64    `json:"product_id"`
-	Quantity  uint64    `json:"quantity"`
-	Status    string    `json:"status"`
-	ExpiresAt time.Time `json:"expires_at"`
+	Id        uint64 `json:"id"`
+	OrderId   uint64 `json:"order_id"`
+	ProductId uint64 `json:"product_id"`
+	Quantity  uint64 `json:"quantity"`
 }

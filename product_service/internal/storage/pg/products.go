@@ -40,6 +40,15 @@ const (
 		DELETE FROM products
 		WHERE id = $1;
 	`
+
+	ReserveProductQuery = `
+	INSERT INTO product_reservations (order_id, product_id, quantity)
+	VALUES ($1, $2, $3)`
+
+	DeleteOrderReservations = `
+	DELETE FROM product_reservations
+	WHERE order_id = $1
+	`
 )
 
 type ProductsRepo struct {
@@ -108,6 +117,81 @@ func (r *ProductsRepo) ToDownProductQuantity(ctx context.Context, amount uint64,
 
 func (r *ProductsRepo) DeleteProduct(ctx context.Context, productId uint64) error {
 	if _, err := r.pool.Exec(ctx, DeleteProductQuery, productId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ProductsRepo) ReserveProducts(ctx context.Context, reservations []*models.Reservation) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil
+	}
+	defer tx.Rollback(ctx)
+
+	for _, r := range reservations {
+		_, err = tx.Exec(ctx, ReserveProductQuery, r.OrderId, r.ProductId, r.Quantity)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.Exec(ctx, ToDownProductsQuantityQuery, r.Quantity, r.ProductId)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ProductsRepo) CancelReservationForOrder(ctx context.Context, orderId uint64) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(
+		ctx,
+		`SELECT product_id, quantity FROM product_reservations WHERE order_id = $1`,
+		orderId,
+	)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var productId uint64
+		var quantity uint64
+		err := rows.Scan(&productId, &quantity)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.Exec(ctx, ToUpProductsQuantityQuery, quantity, productId)
+		if err != nil {
+			return err
+		}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(ctx, DeleteOrderReservations, orderId)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
 		return err
 	}
 

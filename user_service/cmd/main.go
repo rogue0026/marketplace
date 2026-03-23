@@ -1,33 +1,27 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"user_service/internal/models"
-	"user_service/internal/storage/pg"
-	"user_service/pkg/postgres"
+	"log"
+	"os"
+	"os/signal"
+	"user_service/application"
 )
 
 func main() {
-	conn := "postgresql://user:password@localhost:5431/user_service_db"
-	p, err := postgres.NewPool(context.Background(), conn)
+	app, err := application.New()
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+	app.Run()
+	log.Printf("starting user service at %s\n", app.Cfg.GRPCAddr)
+	<-stop
 
-	baskets := pg.NewBasketsRepo(p)
+	app.Stop()
 
-	product := &models.Product{
-		UserId:          uint64(1),
-		ProductId:       2,
-		ProductQuantity: 5,
-		PricePerUnit:    1800,
-	}
-	err = baskets.AddProductToBasket(context.Background(), product)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	log.Println("user service stopped")
 
 }

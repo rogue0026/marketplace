@@ -2,72 +2,74 @@ package application
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"net"
-	"user_service/api/pb"
+	"user_service/internal/config"
 	"user_service/internal/service"
 	"user_service/internal/storage/pg"
 	"user_service/internal/transport/grpcapi"
 	"user_service/pkg/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	pb "github.com/rogue0026/marketplace-proto/users"
+
 	"google.golang.org/grpc"
 )
 
 type Application struct {
-	grpcServer *grpc.Server
-	connPool   *pgxpool.Pool
-	Cfg        *Config
+	Cfg         *config.AppConfig
+	connPool    *pgxpool.Pool
+	tcpListener net.Listener
+	grpcServer  *grpc.Server
 }
 
-func New(cfg *Config) (*Application, error) {
-	ctx := context.Background()
-
-	var opts []grpc.ServerOption
-	grpcServer := grpc.NewServer(opts...)
-
-	p, err := postgres.NewPool(ctx, cfg.DatabaseURL)
+func New() (*Application, error) {
+	appConfig, err := config.Load()
 	if err != nil {
 		return nil, err
 	}
 
-	wallets := pg.NewWalletsRepo(p)
-	baskets := pg.NewBasketsRepo(p)
-	users := pg.NewUsersRepo(p)
+	pool, err := postgres.NewPool(context.Background(), appConfig.DatabaseURL)
+	if err != nil {
+		return nil, err
+	}
 
-	userService := service.NewUserService(
-		users,
-		wallets,
-		baskets,
-	)
+	users := pg.NewUsersRepo(pool)
+	wallets := pg.NewWalletsRepo(pool)
+	baskets := pg.NewBasketsRepo(pool)
+
+	userService := service.NewUserService(users, wallets, baskets)
 
 	h := grpcapi.NewHandler(userService)
 
+	var opts []grpc.ServerOption
+	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterUserServiceServer(grpcServer, h)
 
+	l, err := net.Listen("tcp", appConfig.GRPCAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	app := &Application{
-		grpcServer: grpcServer,
-		connPool:   p,
-		Cfg:        cfg,
+		Cfg:         appConfig,
+		connPool:    pool,
+		tcpListener: l,
+		grpcServer:  grpcServer,
 	}
 
 	return app, nil
 }
 
-func (a *Application) Run() error {
-	listener, err := net.Listen("tcp", a.Cfg.GRPCServerAddr)
-	if err != nil {
-		return err
-	}
-
+func (a *Application) Run() {
+	// todo
 	go func() {
-		err := a.grpcServer.Serve(listener)
+		err := a.grpcServer.Serve(a.tcpListener)
 		if err != nil {
-			log.Println(err)
+			fmt.Println(err.Error())
+			return
 		}
 	}()
-
-	return nil
 }
 
 func (a *Application) Stop() {

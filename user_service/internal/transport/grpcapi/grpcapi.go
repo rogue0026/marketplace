@@ -11,7 +11,15 @@ import (
 
 type UserServiceHandler struct {
 	pb.UnimplementedUserServiceServer
-	service *service.UserService
+	s *service.UserService
+}
+
+func NewHandler(s *service.UserService) *UserServiceHandler {
+	h := &UserServiceHandler{
+		s: s,
+	}
+
+	return h
 }
 
 func (s *UserServiceHandler) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
@@ -19,7 +27,7 @@ func (s *UserServiceHandler) CreateUser(ctx context.Context, req *pb.CreateUserR
 		Username:     req.Login,
 		PasswordHash: req.Password,
 	}
-	userId, err := s.service.CreateNewUser(ctx, usr)
+	userId, err := s.s.CreateNewUser(ctx, usr)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +39,7 @@ func (s *UserServiceHandler) CreateUser(ctx context.Context, req *pb.CreateUserR
 }
 
 func (s *UserServiceHandler) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
-	err := s.service.DeleteUser(ctx, req.UserId)
+	err := s.s.DeleteUser(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +48,7 @@ func (s *UserServiceHandler) DeleteUser(ctx context.Context, req *pb.DeleteUserR
 }
 
 func (s *UserServiceHandler) AddMoney(ctx context.Context, req *pb.AddMoneyRequest) (*emptypb.Empty, error) {
-	err := s.service.ToUpBalance(ctx, req.UserId, req.Amount)
+	err := s.s.ToUpBalance(ctx, req.UserId, req.Amount)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +57,7 @@ func (s *UserServiceHandler) AddMoney(ctx context.Context, req *pb.AddMoneyReque
 }
 
 func (s *UserServiceHandler) WriteOffMoney(ctx context.Context, req *pb.WriteOffMoneyRequest) (*emptypb.Empty, error) {
-	err := s.service.ToDownBalance(ctx, req.UserId, req.Amount)
+	err := s.s.ToDownBalance(ctx, req.UserId, req.Amount)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +66,7 @@ func (s *UserServiceHandler) WriteOffMoney(ctx context.Context, req *pb.WriteOff
 }
 
 func (s *UserServiceHandler) GetProductsFromBasket(ctx context.Context, req *pb.GetProductsFromBasketRequest) (*pb.GetProductsFromBasketResponse, error) {
-	basketInfo, err := s.service.ShowProductsFromBasket(ctx, req.UserId)
+	basketInfo, err := s.s.ShowProductsFromBasket(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +101,7 @@ func (s *UserServiceHandler) AddProductToBasket(ctx context.Context, req *pb.Add
 		PricePerUnit:    req.PricePerUnit,
 	}
 
-	err := s.service.AddProductToBasket(ctx, p)
+	err := s.s.AddProductToBasket(ctx, p)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +110,7 @@ func (s *UserServiceHandler) AddProductToBasket(ctx context.Context, req *pb.Add
 }
 
 func (s *UserServiceHandler) ClearUserBasket(ctx context.Context, req *pb.ClearUserBasketRequest) (*emptypb.Empty, error) {
-	err := s.service.ClearUserBasket(ctx, req.UserId)
+	err := s.s.ClearUserBasket(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
