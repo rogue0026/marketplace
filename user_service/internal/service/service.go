@@ -8,16 +8,16 @@ import (
 )
 
 type UserService struct {
-	usersRepo   UsersRepository
-	walletsRepo WalletsRepository
-	basketsRepo BasketsRepository
+	users   UsersRepository
+	wallets WalletsRepository
+	baskets BasketsRepository
 }
 
 func NewUserService(users UsersRepository, wallets WalletsRepository, baskets BasketsRepository) *UserService {
 	us := &UserService{
-		usersRepo:   users,
-		walletsRepo: wallets,
-		basketsRepo: baskets,
+		users:   users,
+		wallets: wallets,
+		baskets: baskets,
 	}
 
 	return us
@@ -32,7 +32,7 @@ func (s *UserService) CreateNewUser(ctx context.Context, user *models.User) (uin
 
 	user.PasswordHash = string(hashedPassword)
 
-	userId, err := s.usersRepo.CreateUser(ctx, user)
+	userId, err := s.users.CreateUser(ctx, user)
 	if err != nil {
 		return 0, err
 	}
@@ -41,7 +41,7 @@ func (s *UserService) CreateNewUser(ctx context.Context, user *models.User) (uin
 }
 
 func (s *UserService) DeleteUser(ctx context.Context, userId uint64) error {
-	err := s.usersRepo.DeleteUser(ctx, userId)
+	err := s.users.DeleteUser(ctx, userId)
 	if err != nil {
 		return err
 	}
@@ -49,25 +49,26 @@ func (s *UserService) DeleteUser(ctx context.Context, userId uint64) error {
 	return nil
 }
 
-func (s *UserService) ShowProductsFromBasket(ctx context.Context, userId uint64) ([]*models.Product, error) {
-	userProducts, err := s.basketsRepo.GetProductsByUserId(ctx, userId)
+func (s *UserService) ShowProductsFromBasket(ctx context.Context, userId uint64) (*models.UserBasketInfo, error) {
+	basketInfo, err := s.baskets.GetUserBasket(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
 
-	return userProducts, nil
+	return basketInfo, nil
 }
 
 func (s *UserService) AddProductToBasket(ctx context.Context, product *models.Product) error {
-	err := s.basketsRepo.AddProductToUserBasket(ctx, product)
+	err := s.baskets.AddProductToBasket(ctx, product)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func (s *UserService) DeleteProductFromBasket(ctx context.Context, productId uint64) error {
-	err := s.basketsRepo.DeleteProductFromBasket(ctx, productId)
+func (s *UserService) DeleteProductFromBasket(ctx context.Context, userId uint64, productId uint64) error {
+	err := s.baskets.DeleteProductFromBasket(ctx, userId, productId)
 	if err != nil {
 		return err
 	}
@@ -76,7 +77,7 @@ func (s *UserService) DeleteProductFromBasket(ctx context.Context, productId uin
 }
 
 func (s *UserService) ToUpBalance(ctx context.Context, userId uint64, amount uint64) error {
-	err := s.walletsRepo.ToUpBalance(ctx, userId, amount)
+	err := s.wallets.AddMoney(ctx, userId, amount)
 	if err != nil {
 		return err
 	}
@@ -85,7 +86,7 @@ func (s *UserService) ToUpBalance(ctx context.Context, userId uint64, amount uin
 }
 
 func (s *UserService) ToDownBalance(ctx context.Context, userId uint64, amount uint64) error {
-	err := s.walletsRepo.ToDownBalance(ctx, userId, amount)
+	err := s.wallets.WriteOffMoney(ctx, userId, amount)
 	if err != nil {
 		return err
 	}

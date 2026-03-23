@@ -1,17 +1,11 @@
 package models
 
-import "time"
-
-type ProductInfo struct {
-	ProductId     uint64 `json:"product_id"`
-	PriceSnapshot uint64 `json:"price_snapshot"`
+type OrderItem struct {
 }
 
-type OrderInfo struct {
-	Id           uint64         `json:"id"`
-	UserId       uint64         `json:"user_id"`
-	ProductsInfo []*ProductInfo `json:"products_info"`
-	CreatedAt    time.Time      `json:"created_at"`
-	TotalPrice   uint64         `json:"total_price"`
-	Status       string         `json:"status"`
+type OrderData struct {
+	Id         uint64       `json:"order_id"`
+	UserId     uint64       `json:"user_id"`
+	Items      []*OrderItem `json:"items"`
+	TotalPrice uint64       `json:"total_price"`
 }

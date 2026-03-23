@@ -1,21 +1,16 @@
-CREATE TABLE IF NOT EXISTS products (
-    id BIGSERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    price_per_unit BIGINT NOT NULL,
-    total_quantity BIGINT NOT NULL CHECK (total_quantity >= 0)
+create table if not exists products (
+    id bigserial primary key,
+    name varchar(128) not null,
+    stock_remaining bigint not null check ( stock_remaining >= 0 ),
+    current_price bigint not null
 );
 
-drop table products cascade;
-
-CREATE TABLE IF NOT EXISTS product_reservations (
-    id BIGSERIAL PRIMARY KEY,
-    order_id BIGINT NOT NULL,
-    product_id BIGINT REFERENCES products (id) ON DELETE RESTRICT,
-    quantity BIGINT NOT NULL,
-    status INT NOT NULL,
-    expires_at TIMESTAMP NOT NULL
+create table if not exists product_reservations (
+    id bigserial primary key,
+    product_id bigint references products (id) on delete restrict,
+    amount bigint not null check ( amount >= 0 ),
+    order_id bigint not null,
+    expires_at timestamp not null default (now() + 15 * interval '1 minute')
 );
 
-DROP TABLE product_reservations;
 
-select (current_timestamp < current_timestamp + 10 * interval '1 minutes') as result;

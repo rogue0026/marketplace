@@ -1,43 +1,33 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"os"
-	"os/signal"
-	"user_service/application"
-
-	"github.com/joho/godotenv"
+	"user_service/internal/models"
+	"user_service/internal/storage/pg"
+	"user_service/pkg/postgres"
 )
 
 func main() {
-	err := godotenv.Load()
+	conn := "postgresql://user:password@localhost:5431/user_service_db"
+	p, err := postgres.NewPool(context.Background(), conn)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 		return
 	}
 
-	appCfg, err := application.LoadConfig()
+	baskets := pg.NewBasketsRepo(p)
+
+	product := &models.Product{
+		UserId:          uint64(1),
+		ProductId:       2,
+		ProductQuantity: 5,
+		PricePerUnit:    1800,
+	}
+	err = baskets.AddProductToBasket(context.Background(), product)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 		return
 	}
 
-	app, err := application.New(appCfg)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	err = app.Run(app.Cfg.GRPCServerAddr)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println("user service started")
-
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-	<-stop
-	app.Stop()
-	fmt.Println("user service stopped")
 }

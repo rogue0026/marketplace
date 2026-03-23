@@ -7,6 +7,28 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const (
+	AddProductToBasketQuery = `
+	INSERT INTO basket_content (user_id, product_id, product_quantity, current_price)
+	VALUES ($1, $2, $3, $4)
+	`
+
+	DeleteProductFromBasketQuery = `
+	DELETE FROM basket_content
+	WHERE user_id = $1 AND product_id = $2
+	`
+
+	GetUserBasketQuery = `
+	SELECT
+	    id,
+	    user_id,
+	    product_id,
+	    product_quantity,
+	    current_price
+	FROM basket_content
+	WHERE user_id = $1`
+)
+
 type BasketsRepo struct {
 	pool *pgxpool.Pool
 }
@@ -19,82 +41,68 @@ func NewBasketsRepo(pool *pgxpool.Pool) *BasketsRepo {
 	return repo
 }
 
-func (r *BasketsRepo) GetProductsByUserId(ctx context.Context, userId uint64) ([]*models.Product, error) {
-	sqlQuery := `
-	SELECT 
-		id,
-		user_id,
-		product_id,
-		quantity,
-		price_per_unit
-	FROM basket_products
-	WHERE user_id = $1;
-	`
-	rows, err := r.pool.Query(ctx, sqlQuery, userId)
+func (repo *BasketsRepo) AddProductToBasket(ctx context.Context, p *models.Product) error {
+	_, err := repo.pool.Exec(
+		ctx,
+		AddProductToBasketQuery,
+		p.UserId,
+		p.ProductId,
+		p.ProductQuantity,
+		p.PricePerUnit,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *BasketsRepo) DeleteProductFromBasket(ctx context.Context, userId uint64, productId uint64) error {
+	_, err := repo.pool.Exec(
+		ctx,
+		DeleteProductFromBasketQuery,
+		userId,
+		productId,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *BasketsRepo) GetUserBasket(ctx context.Context, userId uint64) (*models.UserBasketInfo, error) {
+	rows, err := repo.pool.Query(
+		ctx,
+		GetUserBasketQuery,
+		userId,
+	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	products := make([]*models.Product, 0)
+	var totalPrice uint64
 	for rows.Next() {
-		p := models.Product{}
-		err := rows.Scan(
-			&p.Id,
-			&p.UserId,
-			&p.ProductId,
-			&p.ProductQuantity,
-			&p.PricePerUnit,
-		)
-		if err != nil {
+		p := &models.Product{}
+		if err := rows.Scan(
+			p.Id,
+			p.UserId,
+			p.ProductId,
+			p.ProductQuantity,
+			p.PricePerUnit,
+		); err != nil {
 			return nil, err
 		}
-		products = append(products, &p)
+		totalPrice += p.PricePerUnit * p.ProductQuantity
+		products = append(products, p)
 	}
 
-	err = rows.Err()
-	if err != nil {
-		return nil, err
+	basket := &models.UserBasketInfo{
+		Products:   products,
+		TotalPrice: totalPrice,
 	}
 
-	return products, nil
-}
-
-func (r *BasketsRepo) AddProductToUserBasket(ctx context.Context, product *models.Product) error {
-	sqlQuery := `
-	INSERT INTO basket_products (user_id, product_id, quantity, price_per_unit)
-	VALUES ($1, $2, $3, $4);
-	`
-
-	_, err := r.pool.Exec(
-		ctx,
-		sqlQuery,
-		product.UserId,
-		product.ProductId,
-		product.ProductQuantity,
-		product.PricePerUnit,
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *BasketsRepo) DeleteProductFromBasket(ctx context.Context, recordId uint64) error {
-	sqlQuery := `
-	DELETE FROM basket_products
-	WHERE id = $1;
-	`
-
-	_, err := r.pool.Exec(
-		ctx,
-		sqlQuery,
-		recordId,
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return basket, nil
 }

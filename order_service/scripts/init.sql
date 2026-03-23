@@ -1,12 +1,14 @@
-CREATE TABLE IF NOT EXISTS orders (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    status VARCHAR(32)
+create table if not exists orders (
+    id bigserial primary key,
+    user_id bigint not null,
+    total_price bigint not null,
+    status varchar(64) not null
 );
 
-CREATE TABLE IF NOT EXISTS order_contents (
-    order_id BIGINT REFERENCES orders (id) ON DELETE RESTRICT,
-    product_id BIGINT NOT NULL,
-    price_snapshot BIGINT NOT NULL
+create table if not exists order_contents (
+    id bigserial primary key,
+    order_id bigint references orders (id) on delete restrict,
+    product_id bigint not null,
+    product_quantity bigint not null,
+    price_per_unit bigint not null
 );

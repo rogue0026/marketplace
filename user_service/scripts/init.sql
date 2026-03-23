@@ -1,19 +1,20 @@
-CREATE TABLE IF NOT EXISTS users (
-    id BIGSERIAL PRIMARY KEY,
-    username VARCHAR(64) NOT NULL,
-    password_hash VARCHAR(512) NOT NULL
+create table if not exists users (
+    id bigserial primary key,
+    login varchar(64) not null,
+    password_hash varchar(512) not null
 );
 
-CREATE TABLE IF NOT EXISTS wallets (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT REFERENCES users (id) ON DELETE RESTRICT,
-    balance BIGINT NOT NULL DEFAULT 0
+create table if not exists wallets (
+    id bigserial primary key,
+    user_id bigint references users (id) on delete cascade,
+    balance bigint not null default 0 check ( balance >= 0 )
 );
 
-CREATE TABLE IF NOT EXISTS basket_products (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT REFERENCES users (id) ON DELETE RESTRICT,
-    product_id BIGINT,
-    quantity INT,
-    price_per_unit BIGINT
+create table if not exists basket_content (
+    id bigserial primary key,
+    user_id bigint references users(id) on delete cascade,
+    product_id bigint not null,
+    product_quantity bigint not null,
+    current_price bigint not null,
+    CONSTRAINT user_id_product_id UNIQUE (user_id, product_id)
 );

@@ -19,3 +19,8 @@ type Wallet struct {
 	UserId  uint64 `json:"user_id"`
 	Balance uint64 `json:"balance"`
 }
+
+type UserBasketInfo struct {
+	Products   []*Product `json:"products"`
+	TotalPrice uint64     `json:"total_price"`
+}

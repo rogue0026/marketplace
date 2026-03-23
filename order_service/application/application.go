@@ -1,5 +1,9 @@
 package application
 
-type Application struct {
-	Cfg *Config
+type Application struct{}
+
+func New() *Application {
+	a := &Application{}
+
+	return a
 }

@@ -11,12 +11,13 @@ type UsersRepository interface {
 }
 
 type WalletsRepository interface {
-	ToUpBalance(ctx context.Context, userId uint64, amount uint64) error
-	ToDownBalance(ctx context.Context, userId uint64, amount uint64) error
+	CreateWallet(ctx context.Context, userId uint64) error
+	AddMoney(ctx context.Context, userId uint64, amount uint64) error
+	WriteOffMoney(ctx context.Context, userId uint64, amount uint64) error
 }
 
 type BasketsRepository interface {
-	GetProductsByUserId(ctx context.Context, userId uint64) ([]*models.Product, error)
-	AddProductToUserBasket(ctx context.Context, product *models.Product) error
-	DeleteProductFromBasket(ctx context.Context, productId uint64) error
+	AddProductToBasket(ctx context.Context, p *models.Product) error
+	DeleteProductFromBasket(ctx context.Context, userId uint64, productId uint64) error
+	GetUserBasket(ctx context.Context, userId uint64) (*models.UserBasketInfo, error)
 }
