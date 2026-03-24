@@ -4,57 +4,56 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"user_service/internal/config"
-	"user_service/internal/service"
-	"user_service/internal/storage/pg"
-	"user_service/internal/transport/grpcapi"
-	"user_service/pkg/postgres"
+	"order_service/internal/config"
+	"order_service/internal/service"
+	"order_service/internal/storage/pg"
+	"order_service/internal/transport/grpcapi"
+	"order_service/pkg/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	pb "github.com/rogue0026/marketplace-proto/users"
-
+	pb "github.com/rogue0026/marketplace-proto/orders"
 	"google.golang.org/grpc"
 )
 
 type Application struct {
 	Cfg         *config.AppConfig
 	connPool    *pgxpool.Pool
+	s           *service.OrderService
 	tcpListener net.Listener
 	grpcServer  *grpc.Server
 }
 
 func New() (*Application, error) {
-	appConfig, err := config.Load()
+	cfg, err := config.Load()
 	if err != nil {
 		return nil, err
 	}
 
-	pool, err := postgres.NewPool(context.Background(), appConfig.DatabaseURL)
+	pool, err := postgres.NewPool(context.Background(), cfg.DatabaseURL)
 	if err != nil {
 		return nil, err
 	}
 
-	users := pg.NewUsersRepo(pool)
-	wallets := pg.NewWalletsRepo(pool)
-	baskets := pg.NewBasketsRepo(pool)
+	orders := pg.NewOrdersRepo(pool)
 
-	userService := service.NewUserService(users, wallets, baskets)
-
-	h := grpcapi.NewHandler(userService)
+	s, err := service.NewOrderService(orders)
+	if err != nil {
+		return nil, err
+	}
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterUserServiceServer(grpcServer, h)
 
-	l, err := net.Listen("tcp", appConfig.GRPCAddr)
-	if err != nil {
-		return nil, err
-	}
+	h := grpcapi.NewOrdersHandler(s)
+	pb.RegisterOrderServiceServer(grpcServer, h)
+
+	listener, err := net.Listen("tcp", cfg.GRPCAddr)
 
 	app := &Application{
-		Cfg:         appConfig,
+		Cfg:         cfg,
 		connPool:    pool,
-		tcpListener: l,
+		s:           s,
+		tcpListener: listener,
 		grpcServer:  grpcServer,
 	}
 
@@ -62,7 +61,6 @@ func New() (*Application, error) {
 }
 
 func (a *Application) Run() {
-	// todo
 	go func() {
 		err := a.grpcServer.Serve(a.tcpListener)
 		if err != nil {
@@ -79,5 +77,6 @@ func (a *Application) Stop() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

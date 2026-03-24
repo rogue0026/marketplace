@@ -45,7 +45,7 @@ const (
 	INSERT INTO product_reservations (order_id, product_id, quantity)
 	VALUES ($1, $2, $3)`
 
-	DeleteOrderReservations = `
+	DeleteOrderReservationsQuery = `
 	DELETE FROM product_reservations
 	WHERE order_id = $1
 	`
@@ -185,12 +185,25 @@ func (r *ProductsRepo) CancelReservationForOrder(ctx context.Context, orderId ui
 		return err
 	}
 
-	_, err = tx.Exec(ctx, DeleteOrderReservations, orderId)
+	_, err = tx.Exec(ctx, DeleteOrderReservationsQuery, orderId)
 	if err != nil {
 		return err
 	}
 
 	err = tx.Commit(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ProductsRepo) DeleteReservationsForOrder(ctx context.Context, orderId uint64) error {
+	_, err := r.pool.Exec(
+		ctx,
+		DeleteOrderReservationsQuery,
+		orderId,
+	)
 	if err != nil {
 		return err
 	}

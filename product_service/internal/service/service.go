@@ -11,19 +11,18 @@ type ProductsRepository interface {
 	ToUpProductQuantity(ctx context.Context, amount uint64, productId uint64) error
 	ToDownProductQuantity(ctx context.Context, amount uint64, productId uint64) error
 	DeleteProduct(ctx context.Context, productId uint64) error
+	ReserveProducts(ctx context.Context, reservations []*models.Reservation) error
+	CancelReservationForOrder(ctx context.Context, orderId uint64) error
+	DeleteReservationsForOrder(ctx context.Context, orderId uint64) error
 }
-
-type ReservationsRepository interface{}
 
 type ProductService struct {
-	Products     ProductsRepository
-	Reservations ReservationsRepository
+	Products ProductsRepository
 }
 
-func NewProductService(products ProductsRepository, reservations ReservationsRepository) *ProductService {
+func NewProductService(products ProductsRepository) *ProductService {
 	ps := &ProductService{
-		Products:     products,
-		Reservations: reservations,
+		Products: products,
 	}
 
 	return ps
@@ -74,20 +73,29 @@ func (ps *ProductService) ToDownProductQuantity(ctx context.Context, productId, 
 	return nil
 }
 
-//func (ps *ProductService) ReserveProducts(ctx context.Context, reservations []*models.Reservation) error {
-//	err := ps.Reservations.ReserveProducts(ctx, reservations)
-//	if err != nil {
-//		return err
-//	}
-//
-//	return nil
-//}
+func (ps *ProductService) ReserveProducts(ctx context.Context, reservations []*models.Reservation) error {
+	err := ps.Products.ReserveProducts(ctx, reservations)
+	if err != nil {
+		return err
+	}
 
-//func (ps *ProductService) CleanExpiredReservations(ctx context.Context) error {
-//	err := ps.Reservations.CleanExpiredReservations(ctx)
-//	if err != nil {
-//		return err
-//	}
-//
-//	return nil
-//}
+	return nil
+}
+
+func (ps *ProductService) CancelReservationsForOrder(ctx context.Context, orderId uint64) error {
+	err := ps.Products.CancelReservationForOrder(ctx, orderId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ps *ProductService) DeleteReservationsForOrder(ctx context.Context, orderId uint64) error {
+	err := ps.Products.DeleteReservationsForOrder(ctx, orderId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
