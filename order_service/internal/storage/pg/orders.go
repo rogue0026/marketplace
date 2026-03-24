@@ -22,6 +22,27 @@ const (
 	INSERT INTO order_contents (order_id, product_id, product_quantity, price_per_unit)
 	VALUES ($1, $2, $3, $4)
 	`
+
+	GetOrderInfoQuery = `
+	SELECT
+	    user_id,
+	    total_price
+	FROM orders WHERE id = $1;
+	`
+
+	GetOrderContentQuery = `
+	SELECT 
+	    product_id,
+	    product_quantity,
+	    price_per_unit
+	FROM order_contents WHERE order_id = $1
+	`
+
+	ChangeOrderStatusQuery = `
+	UPDATE orders
+	SET status = $2
+	WHERE id = $1
+	`
 )
 
 type OrdersRepo struct {
@@ -35,14 +56,14 @@ func NewOrdersRepo(pool *pgxpool.Pool) *OrdersRepo {
 	return r
 }
 
-func (r *OrdersRepo) CreateOrder(ctx context.Context, o *models.Order) error {
+func (r *OrdersRepo) CreateOrder(ctx context.Context, o *models.Order) (uint64, error) {
+	var orderId uint64
+
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
-		return err
+		return orderId, err
 	}
 	defer tx.Rollback(ctx)
-
-	var orderId uint64
 
 	err = tx.QueryRow(
 		ctx,
@@ -52,7 +73,7 @@ func (r *OrdersRepo) CreateOrder(ctx context.Context, o *models.Order) error {
 		StatusWaitingForPayment,
 	).Scan(&orderId)
 	if err != nil {
-		return err
+		return orderId, err
 	}
 
 	for _, orderItem := range o.Items {
@@ -65,22 +86,76 @@ func (r *OrdersRepo) CreateOrder(ctx context.Context, o *models.Order) error {
 			orderItem.PricePerUnit,
 		)
 		if err != nil {
-			return err
+			return orderId, err
 		}
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return err
+		return orderId, err
 	}
 
-	return nil
+	return orderId, nil
 }
 
 func (r *OrdersRepo) GetOrderInfo(ctx context.Context, orderId uint64) (*models.Order, error) {
-	return nil, nil
+	var userId uint64
+	var totalPrice uint64
+	err := r.pool.QueryRow(
+		ctx,
+		GetOrderInfoQuery,
+		orderId,
+	).Scan(&userId, &totalPrice)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.pool.Query(
+		ctx,
+		GetOrderContentQuery,
+		orderId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	orderItems := make([]*models.OrderItem, 0)
+	for rows.Next() {
+		item := models.OrderItem{}
+
+		err := rows.Scan(
+			&item.ProductId,
+			&item.Quantity,
+			&item.PricePerUnit,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		orderItems = append(orderItems, &item)
+	}
+
+	o := &models.Order{
+		OrderId:    orderId,
+		UserId:     userId,
+		Items:      orderItems,
+		TotalPrice: totalPrice,
+	}
+
+	return o, nil
 }
 
 func (r *OrdersRepo) ChangeOrderStatus(ctx context.Context, orderId uint64, status string) error {
+	_, err := r.pool.Exec(
+		ctx,
+		ChangeOrderStatusQuery,
+		orderId,
+		status,
+	)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

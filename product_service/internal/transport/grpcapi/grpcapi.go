@@ -113,27 +113,11 @@ func (h *ProductHandler) CancelReservation(ctx context.Context, req *pb.CancelRe
 	return nil, nil
 }
 
-func (h *ProductHandler) ConfirmReservation(ctx context.Context, req *pb.ConfirmReservationRequest) (*emptypb.Empty, error) {
+func (h *ProductHandler) DeleteReservation(ctx context.Context, req *pb.DeleteReservationRequest) (*emptypb.Empty, error) {
+	err := h.s.DeleteReservationsForOrder(ctx, req.OrderId)
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
-
-/* service layer
-ShowProducts(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error)
-AddProduct(ctx context.Context, p *models.Product) error
-DeleteProduct(ctx context.Context, productId uint64) error
-ToUpProductQuantity(ctx context.Context, productId uint64, quantity uint64) error
-ToDownProductQuantity(ctx context.Context, productId, quantity uint64) error
-ReserveProducts(ctx context.Context, reservations []*models.Reservation) error
-CancelReservationsForOrder(ctx context.Context, orderId uint64) error
-*/
-
-/* grpc layer
-ShowProducts(context.Context, *ShowProductsRequest) (*ShowProductsResponse, error)
-AddProduct(context.Context, *AddProductRequest) (*AddProductResponse, error)
-DeleteProduct(context.Context, *DeleteProductRequest) (*emptypb.Empty, error)
-func (h *ProductHandler) IncreaseProductQuantity(ctx context.Context, req *pb.IncreaseProductRequest) (*pb.emptypb.Empty, error) {}
-func (h *ProductHandler) DecreaseProductQuantity(ctx context.Context, req *pb.DecreaseProductRequest) (*pb.emptypb.Empty, error) {}
-func (h *ProductHandler) ReserveProducts(ctx context.Context, req *pb.ReserveProductsRequest) (*pb.ReserveProductResponse, error) {}
-func (h *ProductHandler) CancelReservation(ctx context.Context, req *pb.CancelReservationRequest) (*pb.emptypb.Empty, error) {}
-func (h *ProductHandler) ConfirmReservation(ctx context.Context, req *pb.ConfirmReservationRequest) (*pb.emptypb.Empty, error) {}
-*/

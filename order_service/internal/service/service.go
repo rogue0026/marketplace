@@ -6,8 +6,6 @@ import (
 
 	pbproducts "github.com/rogue0026/marketplace-proto/products"
 	pbusers "github.com/rogue0026/marketplace-proto/users"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -28,20 +26,11 @@ type OrderService struct {
 	productsClient pbproducts.ProductServiceClient
 }
 
-func NewOrderService(orders OrdersRepository) (*OrderService, error) {
-	dialOpts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-
-	cUsers, err := grpc.NewClient("localhost:50002", dialOpts...) // todo вынести адрес в конфиг
-	if err != nil {
-		return nil, err
-	}
-	usersClient := pbusers.NewUserServiceClient(cUsers)
-
-	cProducts, err := grpc.NewClient("localhost:50001", dialOpts...) // todo вынести адрес в конфиг
-	if err != nil {
-		return nil, err
-	}
-	productsClient := pbproducts.NewProductServiceClient(cProducts)
+func NewOrderService(
+	orders OrdersRepository,
+	usersClient pbusers.UserServiceClient,
+	productsClient pbproducts.ProductServiceClient,
+) (*OrderService, error) {
 
 	s := &OrderService{
 		orders:         orders,
@@ -88,14 +77,6 @@ func (s *OrderService) CreateOrder(ctx context.Context, userId uint64) (uint64, 
 }
 
 func (s *OrderService) PayForOrder(ctx context.Context, orderId uint64) error {
-
-	/*
-		зарезервировать товар на складе для заказа который сделал пользователь
-		попытаться списать деньги со счета пользователя
-		если деньги списалить, то просто удаляю зарезервированный товар из таблицы резервирования
-		если деньги не списалить, то отменить резервирование товара (удалить записи из таблицы резервирования и пополнить складские запасы)
-	*/
-
 	// изменяем статус заказа
 	if err := s.orders.ChangeOrderStatus(ctx, orderId, StatusOrderInProcessing); err != nil {
 		return err
@@ -151,6 +132,16 @@ func (s *OrderService) PayForOrder(ctx context.Context, orderId uint64) error {
 		return err
 	}
 
-	// todo добавить очистку зарезервированных товаров
+	// удаляем записи зарезервированных товаров
+	_, err = s.productsClient.DeleteReservation(
+		ctx,
+		&pbproducts.DeleteReservationRequest{
+			OrderId: orderId,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -12,7 +12,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	pb "github.com/rogue0026/marketplace-proto/orders"
+	pbproducts "github.com/rogue0026/marketplace-proto/products"
+	pbusers "github.com/rogue0026/marketplace-proto/users"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Application struct {
@@ -36,7 +39,23 @@ func New() (*Application, error) {
 
 	orders := pg.NewOrdersRepo(pool)
 
-	s, err := service.NewOrderService(orders)
+	dialOpts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+
+	ccUsers, err := grpc.NewClient(cfg.UsersAddr, dialOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	usersClient := pbusers.NewUserServiceClient(ccUsers)
+
+	ccProducts, err := grpc.NewClient(cfg.ProductsAddr, dialOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	productsClient := pbproducts.NewProductServiceClient(ccProducts)
+
+	s, err := service.NewOrderService(orders, usersClient, productsClient)
 	if err != nil {
 		return nil, err
 	}

@@ -9,7 +9,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
-	github.com/rogue0026/marketplace-proto v0.0.0-20260324094123-73a36ea4d28d // indirect
+	github.com/rogue0026/marketplace-proto v0.0.0-20260324152006-2ee728c2d003 // indirect
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect

@@ -31,6 +31,8 @@ github.com/rogue0026/marketplace-proto v0.0.0-20260324090527-fe0a10d9e802 h1:g8+
 github.com/rogue0026/marketplace-proto v0.0.0-20260324090527-fe0a10d9e802/go.mod h1:YUuAFmb8NEbOej2nfPyMJR0PQ7Eva/iQC/nWS0Rkcno=
 github.com/rogue0026/marketplace-proto v0.0.0-20260324091506-92dbfa4d6b6c h1:QXSNgLhpAbGWJnF1U9A1lBlWGOThpvXq5lZkNBPB1Xk=
 github.com/rogue0026/marketplace-proto v0.0.0-20260324091506-92dbfa4d6b6c/go.mod h1:YUuAFmb8NEbOej2nfPyMJR0PQ7Eva/iQC/nWS0Rkcno=
+github.com/rogue0026/marketplace-proto v0.0.0-20260324152006-2ee728c2d003 h1:8kdX5RN/S2w7eSv7UjcFpMFLYBRgVoLTq94+imtQ7W4=
+github.com/rogue0026/marketplace-proto v0.0.0-20260324152006-2ee728c2d003/go.mod h1:YUuAFmb8NEbOej2nfPyMJR0PQ7Eva/iQC/nWS0Rkcno=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=

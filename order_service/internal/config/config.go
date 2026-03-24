@@ -13,8 +13,10 @@ var (
 )
 
 type AppConfig struct {
-	DatabaseURL string
-	GRPCAddr    string
+	DatabaseURL  string
+	GRPCAddr     string
+	UsersAddr    string
+	ProductsAddr string
 }
 
 func Load() (*AppConfig, error) {
