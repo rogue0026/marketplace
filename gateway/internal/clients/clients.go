@@ -11,9 +11,9 @@ import (
 )
 
 type Clients struct {
-	usersClient    users.UserServiceClient
-	productsClient products.ProductServiceClient
-	ordersClient   orders.OrderServiceClient
+	UsersClient    users.UserServiceClient
+	ProductsClient products.ProductServiceClient
+	OrdersClient   orders.OrderServiceClient
 }
 
 func New(cfg *config.GRPCClientsConfig) (*Clients, error) {
@@ -39,9 +39,9 @@ func New(cfg *config.GRPCClientsConfig) (*Clients, error) {
 	ordersClient := orders.NewOrderServiceClient(ccOrders)
 
 	c := &Clients{
-		usersClient:    usersClient,
-		productsClient: productsClient,
-		ordersClient:   ordersClient,
+		UsersClient:    usersClient,
+		ProductsClient: productsClient,
+		OrdersClient:   ordersClient,
 	}
 
 	return c, nil
