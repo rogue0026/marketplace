@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"order_service/internal/application"
+	"order_service/application"
 	"os"
 	"os/signal"
 )
