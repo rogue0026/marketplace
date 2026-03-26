@@ -137,7 +137,11 @@ func (s *OrderService) PayForOrder(ctx context.Context, orderId uint64) error {
 		_, err = s.productsClient.CancelReservation(ctx, &pbproducts.CancelReservationRequest{
 			OrderId: orderId,
 		})
+		if err != nil {
+			return err
+		}
 
+		err = s.orders.ChangeOrderStatus(ctx, orderId, StatusOrderWaitingForPayment)
 		if err != nil {
 			return err
 		}
