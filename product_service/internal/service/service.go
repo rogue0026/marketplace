@@ -7,7 +7,8 @@ import (
 
 type ProductsRepository interface {
 	AddProduct(ctx context.Context, p *models.Product) error
-	GetProducts(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error)
+	ProductList(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error)
+	ProductsById(ctx context.Context, ids []uint64) ([]*models.Product, error)
 	ToUpProductQuantity(ctx context.Context, amount uint64, productId uint64) error
 	ToDownProductQuantity(ctx context.Context, amount uint64, productId uint64) error
 	DeleteProduct(ctx context.Context, productId uint64) error
@@ -17,19 +18,28 @@ type ProductsRepository interface {
 }
 
 type ProductService struct {
-	Products ProductsRepository
+	products ProductsRepository
 }
 
 func NewProductService(products ProductsRepository) *ProductService {
 	ps := &ProductService{
-		Products: products,
+		products: products,
 	}
 
 	return ps
 }
 
 func (ps *ProductService) ShowProducts(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error) {
-	products, err := ps.Products.GetProducts(ctx, pageNumber, itemsPerPage)
+	products, err := ps.products.ProductList(ctx, pageNumber, itemsPerPage)
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+func (ps *ProductService) ProductsByIds(ctx context.Context, ids []uint64) ([]*models.Product, error) {
+	products, err := ps.products.ProductsById(ctx, ids)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +48,7 @@ func (ps *ProductService) ShowProducts(ctx context.Context, pageNumber uint64, i
 }
 
 func (ps *ProductService) AddProduct(ctx context.Context, p *models.Product) error {
-	err := ps.Products.AddProduct(ctx, p)
+	err := ps.products.AddProduct(ctx, p)
 	if err != nil {
 		return err
 	}
@@ -47,7 +57,7 @@ func (ps *ProductService) AddProduct(ctx context.Context, p *models.Product) err
 }
 
 func (ps *ProductService) DeleteProduct(ctx context.Context, productId uint64) error {
-	err := ps.Products.DeleteProduct(ctx, productId)
+	err := ps.products.DeleteProduct(ctx, productId)
 	if err != nil {
 		return err
 	}
@@ -56,7 +66,7 @@ func (ps *ProductService) DeleteProduct(ctx context.Context, productId uint64) e
 }
 
 func (ps *ProductService) ToUpProductQuantity(ctx context.Context, productId uint64, quantity uint64) error {
-	err := ps.Products.ToUpProductQuantity(ctx, productId, quantity)
+	err := ps.products.ToUpProductQuantity(ctx, productId, quantity)
 	if err != nil {
 		return err
 	}
@@ -65,7 +75,7 @@ func (ps *ProductService) ToUpProductQuantity(ctx context.Context, productId uin
 }
 
 func (ps *ProductService) ToDownProductQuantity(ctx context.Context, productId, quantity uint64) error {
-	err := ps.Products.ToDownProductQuantity(ctx, productId, quantity)
+	err := ps.products.ToDownProductQuantity(ctx, productId, quantity)
 	if err != nil {
 		return err
 	}
@@ -74,7 +84,7 @@ func (ps *ProductService) ToDownProductQuantity(ctx context.Context, productId, 
 }
 
 func (ps *ProductService) ReserveProducts(ctx context.Context, reservations []*models.Reservation) error {
-	err := ps.Products.ReserveProducts(ctx, reservations)
+	err := ps.products.ReserveProducts(ctx, reservations)
 	if err != nil {
 		return err
 	}
@@ -83,7 +93,7 @@ func (ps *ProductService) ReserveProducts(ctx context.Context, reservations []*m
 }
 
 func (ps *ProductService) CancelReservationsForOrder(ctx context.Context, orderId uint64) error {
-	err := ps.Products.CancelReservationForOrder(ctx, orderId)
+	err := ps.products.CancelReservationForOrder(ctx, orderId)
 	if err != nil {
 		return err
 	}
@@ -92,7 +102,7 @@ func (ps *ProductService) CancelReservationsForOrder(ctx context.Context, orderI
 }
 
 func (ps *ProductService) DeleteReservationsForOrder(ctx context.Context, orderId uint64) error {
-	err := ps.Products.DeleteReservationsForOrder(ctx, orderId)
+	err := ps.products.DeleteReservationsForOrder(ctx, orderId)
 	if err != nil {
 		return err
 	}

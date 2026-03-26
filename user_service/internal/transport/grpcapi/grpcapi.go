@@ -74,19 +74,14 @@ func (s *UserServiceHandler) GetProductsFromBasket(ctx context.Context, req *pb.
 	basketProducts := make([]*pb.BasketProduct, 0)
 	for _, elem := range basketInfo.Products {
 		p := &pb.BasketProduct{
-			Id:              elem.Id,
-			UserId:          elem.UserId,
-			ProductId:       elem.ProductId,
-			ProductQuantity: elem.ProductQuantity,
-			PricePerUnit:    elem.PricePerUnit,
+			Id:       elem.Id,
+			Quantity: elem.Quantity,
 		}
 		basketProducts = append(basketProducts, p)
 	}
 
 	resp := &pb.GetProductsFromBasketResponse{
-		UserId:      req.UserId,
 		BasketItems: basketProducts,
-		TotalPrice:  basketInfo.TotalPrice,
 	}
 
 	return resp, nil
@@ -94,14 +89,11 @@ func (s *UserServiceHandler) GetProductsFromBasket(ctx context.Context, req *pb.
 
 func (s *UserServiceHandler) AddProductToBasket(ctx context.Context, req *pb.AddProductsToBasketRequest) (*emptypb.Empty, error) {
 	p := &models.Product{
-		Id:              req.UserId,
-		UserId:          req.UserId,
-		ProductId:       req.ProductId,
-		ProductQuantity: req.ProductQuantity,
-		PricePerUnit:    req.PricePerUnit,
+		Id:       req.ProductId,
+		Quantity: req.ProductQuantity,
 	}
 
-	err := s.s.AddProductToBasket(ctx, p)
+	err := s.s.AddProductToBasket(ctx, req.UserId, p)
 	if err != nil {
 		return nil, err
 	}

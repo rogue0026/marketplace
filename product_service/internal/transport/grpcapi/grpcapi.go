@@ -44,6 +44,27 @@ func (h *ProductHandler) ShowProducts(ctx context.Context, req *pb.ShowProductsR
 	return resp, nil
 }
 
+func (h *ProductHandler) ShowProductsByIds(ctx context.Context, req *pb.ShowProductsByIdsRequest) (*pb.ShowProductsResponse, error) {
+	products, err := h.s.ProductsByIds(ctx, req.Ids)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &pb.ShowProductsResponse{
+		Products: make([]*pb.Product, 0, len(products)),
+	}
+	for _, elem := range products {
+		resp.Products = append(resp.Products, &pb.Product{
+			ProductId:      elem.Id,
+			Name:           elem.Name,
+			CurrentPrice:   elem.PricePerUnit,
+			RemainingStock: elem.StockRemaining,
+		})
+	}
+
+	return resp, nil
+}
+
 func (h *ProductHandler) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*pb.AddProductResponse, error) {
 	p := &models.Product{
 		Name:           req.Name,

@@ -7,11 +7,8 @@ type User struct {
 }
 
 type Product struct {
-	Id              uint64 `json:"id"`
-	UserId          uint64 `json:"user_id"`
-	ProductId       uint64 `json:"product_id"`
-	ProductQuantity uint64 `json:"product_quantity"`
-	PricePerUnit    uint64 `json:"price_per_unit"`
+	Id       uint64 `json:"id"`
+	Quantity uint64 `json:"quantity"`
 }
 
 type Wallet struct {
@@ -21,6 +18,5 @@ type Wallet struct {
 }
 
 type UserBasketInfo struct {
-	Products   []*Product `json:"products"`
-	TotalPrice uint64     `json:"total_price"`
+	Products []*Product `json:"products"`
 }

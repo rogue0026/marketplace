@@ -58,8 +58,8 @@ func (s *UserService) ShowProductsFromBasket(ctx context.Context, userId uint64)
 	return basketInfo, nil
 }
 
-func (s *UserService) AddProductToBasket(ctx context.Context, product *models.Product) error {
-	err := s.baskets.AddProductToBasket(ctx, product)
+func (s *UserService) AddProductToBasket(ctx context.Context, userId uint64, product *models.Product) error {
+	err := s.baskets.AddProductToBasket(ctx, userId, product)
 	if err != nil {
 		return err
 	}

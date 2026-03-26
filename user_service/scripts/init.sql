@@ -15,6 +15,5 @@ create table if not exists basket_content (
     user_id bigint references users(id) on delete cascade,
     product_id bigint not null,
     product_quantity bigint not null,
-    current_price bigint not null,
     CONSTRAINT user_id_product_id UNIQUE (user_id, product_id)
 );

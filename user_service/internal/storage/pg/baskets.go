@@ -9,8 +9,8 @@ import (
 
 const (
 	AddProductToBasketQuery = `
-	INSERT INTO basket_content (user_id, product_id, product_quantity, current_price)
-	VALUES ($1, $2, $3, $4)
+	INSERT INTO basket_content (user_id, product_id, product_quantity)
+	VALUES ($1, $2, $3)
 	`
 
 	DeleteProductFromBasketQuery = `
@@ -20,11 +20,8 @@ const (
 
 	GetUserBasketQuery = `
 	SELECT
-	    id,
-	    user_id,
 	    product_id,
-	    product_quantity,
-	    current_price
+	    product_quantity
 	FROM basket_content
 	WHERE user_id = $1`
 
@@ -46,14 +43,13 @@ func NewBasketsRepo(pool *pgxpool.Pool) *BasketsRepo {
 	return repo
 }
 
-func (repo *BasketsRepo) AddProductToBasket(ctx context.Context, p *models.Product) error {
+func (repo *BasketsRepo) AddProductToBasket(ctx context.Context, userId uint64, p *models.Product) error {
 	_, err := repo.pool.Exec(
 		ctx,
 		AddProductToBasketQuery,
-		p.UserId,
-		p.ProductId,
-		p.ProductQuantity,
-		p.PricePerUnit,
+		userId,
+		p.Id,
+		p.Quantity,
 	)
 	if err != nil {
 		return err
@@ -88,25 +84,19 @@ func (repo *BasketsRepo) GetUserBasket(ctx context.Context, userId uint64) (*mod
 	defer rows.Close()
 
 	products := make([]*models.Product, 0)
-	var totalPrice uint64
 	for rows.Next() {
 		p := &models.Product{}
 		if err := rows.Scan(
 			p.Id,
-			p.UserId,
-			p.ProductId,
-			p.ProductQuantity,
-			p.PricePerUnit,
+			p.Quantity,
 		); err != nil {
 			return nil, err
 		}
-		totalPrice += p.PricePerUnit * p.ProductQuantity
 		products = append(products, p)
 	}
 
 	basket := &models.UserBasketInfo{
-		Products:   products,
-		TotalPrice: totalPrice,
+		Products: products,
 	}
 
 	return basket, nil

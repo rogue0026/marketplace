@@ -1,7 +1,15 @@
+github.com/go-chi/chi/v5 v5.2.5 h1:Eg4myHZBjyvJmAFjFvWgrqDTXFyOzjj7YIm3L3mu6Ug=
+github.com/go-chi/chi/v5 v5.2.5/go.mod h1:X7Gx4mteadT3eDOMTsXzmI4/rwUpOwBHLpAfupzFJP0=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
 github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
 github.com/rogue0026/marketplace-proto v0.0.0-20260324152006-2ee728c2d003 h1:8kdX5RN/S2w7eSv7UjcFpMFLYBRgVoLTq94+imtQ7W4=
 github.com/rogue0026/marketplace-proto v0.0.0-20260324152006-2ee728c2d003/go.mod h1:YUuAFmb8NEbOej2nfPyMJR0PQ7Eva/iQC/nWS0Rkcno=
+github.com/rogue0026/marketplace-proto v0.0.0-20260326101019-586753071b59 h1:qwwQeuwCq0akTwwr0JbBYpG5KzHYSlXF5pPBjdxRRZY=
+github.com/rogue0026/marketplace-proto v0.0.0-20260326101019-586753071b59/go.mod h1:YUuAFmb8NEbOej2nfPyMJR0PQ7Eva/iQC/nWS0Rkcno=
+github.com/rogue0026/marketplace-proto v0.0.0-20260326101452-b2dedf35a675 h1:yqPVD/Jrw19Uaii2RBvycrwo4qHZhsmSdquBWB04nmU=
+github.com/rogue0026/marketplace-proto v0.0.0-20260326101452-b2dedf35a675/go.mod h1:YUuAFmb8NEbOej2nfPyMJR0PQ7Eva/iQC/nWS0Rkcno=
+github.com/rogue0026/marketplace-proto v0.0.0-20260326110553-10903fc28cba h1:7FolbYCKzskW/vPOduCo7lTmh1iiowan4ie29+C3MqE=
+github.com/rogue0026/marketplace-proto v0.0.0-20260326110553-10903fc28cba/go.mod h1:YUuAFmb8NEbOej2nfPyMJR0PQ7Eva/iQC/nWS0Rkcno=
 golang.org/x/net v0.48.0 h1:zyQRTTrjc33Lhh0fBgT/H3oZq9WuvRR5gPC70xpDiQU=
 golang.org/x/net v0.48.0/go.mod h1:+ndRgGjkh8FGtu1w1FGbEC31if4VrNVMuKTgcAAnQRY=
 golang.org/x/sys v0.39.0 h1:CvCKL8MeisomCi6qNZ+wbb0DN9E5AATixKsvNtMoMFk=

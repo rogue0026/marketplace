@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"gateway/internal/clients"
 	"gateway/internal/config"
+	"gateway/internal/httphandlers"
+	"gateway/internal/service"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type Application struct {
-	C          *clients.Clients
 	httpServer *http.Server
 }
 
@@ -30,7 +33,13 @@ func New() (*Application, error) {
 		return nil, err
 	}
 
-	mux := http.NewServeMux()
+	svc := service.NewGatewayService(clients)
+
+	mux := chi.NewRouter()
+	mux.Get("/products", httphandlers.ProductCatalogHandler(svc))
+	mux.Post("/users", httphandlers.CreateUserHandler(svc))
+	mux.Delete("/users", httphandlers.DeleteUserHandler(svc))
+	mux.Get("/users/basket", httphandlers.BasketInfoHandler(svc))
 
 	s := &http.Server{
 		Addr:    httpServerConfig.Addr,
@@ -38,7 +47,6 @@ func New() (*Application, error) {
 	}
 
 	app := &Application{
-		C:          clients,
 		httpServer: s,
 	}
 

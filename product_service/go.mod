@@ -12,7 +12,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
-	github.com/rogue0026/marketplace-proto v0.0.0-20260324152006-2ee728c2d003 // indirect
+	github.com/rogue0026/marketplace-proto v0.0.0-20260326110553-10903fc28cba // indirect
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect

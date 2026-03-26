@@ -24,6 +24,15 @@ const (
 	LIMIT $1 OFFSET $2
 	`
 
+	ProductsByIdQuery = `
+	SELECT
+		id,
+		name,
+		current_price
+	FROM products
+	WHERE id = ANY($1)
+	`
+
 	ToUpProductsQuantityQuery = `
 	UPDATE products
 	SET stock_remaining = stock_remaining + $1
@@ -71,7 +80,7 @@ func (r *ProductsRepo) AddProduct(ctx context.Context, p *models.Product) error 
 	return nil
 }
 
-func (r *ProductsRepo) GetProducts(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error) {
+func (r *ProductsRepo) ProductList(ctx context.Context, pageNumber uint64, itemsPerPage uint64) ([]*models.Product, error) {
 	offset := (pageNumber - 1) * itemsPerPage
 
 	rows, err := r.pool.Query(ctx, GetProductsQuery, itemsPerPage, offset)
@@ -99,6 +108,39 @@ func (r *ProductsRepo) GetProducts(ctx context.Context, pageNumber uint64, items
 	}
 
 	return products, nil
+}
+
+func (r *ProductsRepo) ProductsById(ctx context.Context, ids []uint64) ([]*models.Product, error) {
+	rows, err := r.pool.Query(
+		ctx,
+		ProductsByIdQuery,
+		ids,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := make([]*models.Product, 0)
+	for rows.Next() {
+		p := models.Product{}
+		err = rows.Scan(
+			&p.Id,
+			&p.Name,
+			&p.PricePerUnit,
+		)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &p)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, err
 }
 
 func (r *ProductsRepo) ToUpProductQuantity(ctx context.Context, amount uint64, productId uint64) error {

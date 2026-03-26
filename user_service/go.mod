@@ -5,7 +5,7 @@ go 1.25.4
 require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/joho/godotenv v1.5.1
-	github.com/rogue0026/marketplace-proto v0.0.0-20260323141109-c30b11b53eb8
+	github.com/rogue0026/marketplace-proto v0.0.0-20260326101452-b2dedf35a675
 	golang.org/x/crypto v0.49.0
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
