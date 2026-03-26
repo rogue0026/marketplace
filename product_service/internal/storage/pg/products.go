@@ -140,7 +140,7 @@ func (r *ProductsRepo) ProductsById(ctx context.Context, ids []uint64) ([]*model
 		return nil, err
 	}
 
-	return nil, err
+	return result, err
 }
 
 func (r *ProductsRepo) ToUpProductQuantity(ctx context.Context, amount uint64, productId uint64) error {

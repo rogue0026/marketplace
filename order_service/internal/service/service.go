@@ -42,35 +42,52 @@ func NewOrderService(
 }
 
 func (s *OrderService) CreateOrder(ctx context.Context, userId uint64) (uint64, error) {
-
-	in := &pbusers.GetProductsFromBasketRequest{
+	var orderId uint64
+	basket, err := s.usersClient.GetProductsFromBasket(ctx, &pbusers.GetProductsFromBasketRequest{
 		UserId: userId,
-	}
-
-	resp, err := s.usersClient.GetProductsFromBasket(ctx, in)
+	})
 	if err != nil {
-		return 0, err
+		return orderId, err
 	}
 
-	orderItems := make([]*models.OrderItem, 0)
-	for _, elem := range resp.BasketItems {
+	ids := make([]uint64, 0, len(basket.BasketItems))
+	productIdToQuantity := make(map[uint64]uint64)
+	for _, item := range basket.BasketItems {
+		ids = append(ids, item.Id)
+		productIdToQuantity[item.Id] = item.Quantity
+	}
+
+	productsInfo, err := s.productsClient.ShowProductsByIds(ctx, &pbproducts.ShowProductsByIdsRequest{Ids: ids})
+	if err != nil {
+		return orderId, err
+	}
+
+	orderItems := make([]*models.OrderItem, 0, len(productsInfo.Products))
+	var totalPrice uint64
+	for _, p := range productsInfo.Products {
+		totalPrice = totalPrice + p.CurrentPrice*productIdToQuantity[p.ProductId]
 		item := &models.OrderItem{
-			ProductId:    elem.ProductId,
-			Quantity:     elem.ProductQuantity,
-			PricePerUnit: elem.PricePerUnit,
+			ProductId:    p.ProductId,
+			Quantity:     productIdToQuantity[p.ProductId],
+			PricePerUnit: p.CurrentPrice,
 		}
 		orderItems = append(orderItems, item)
 	}
 
-	userOrder := &models.Order{
+	o := &models.Order{
 		UserId:     userId,
-		TotalPrice: resp.TotalPrice,
 		Items:      orderItems,
+		TotalPrice: totalPrice,
 	}
 
-	orderId, err := s.orders.CreateOrder(ctx, userOrder)
+	orderId, err = s.orders.CreateOrder(ctx, o)
 	if err != nil {
-		return 0, err
+		return orderId, err
+	}
+
+	_, err = s.usersClient.ClearUserBasket(ctx, &pbusers.ClearUserBasketRequest{UserId: userId})
+	if err != nil {
+		return orderId, err
 	}
 
 	return orderId, nil
@@ -88,7 +105,7 @@ func (s *OrderService) PayForOrder(ctx context.Context, orderId uint64) error {
 		return err
 	}
 
-	// готовим запрос на резервирование товара
+	// готовим запрос на резервирование товаров
 	productReservations := make([]*pbproducts.Reservation, 0)
 	for _, item := range orderInfo.Items {
 		r := &pbproducts.Reservation{

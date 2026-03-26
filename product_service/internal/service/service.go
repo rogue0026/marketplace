@@ -43,7 +43,6 @@ func (ps *ProductService) ProductsByIds(ctx context.Context, ids []uint64) ([]*m
 	if err != nil {
 		return nil, err
 	}
-
 	return products, nil
 }
 

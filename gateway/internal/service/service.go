@@ -75,13 +75,12 @@ func (s *GatewayService) BasketInfo(ctx context.Context, userId uint64) ([]*mode
 	basketData, err := s.c.UsersClient.GetProductsFromBasket(ctx, &users.GetProductsFromBasketRequest{
 		UserId: userId,
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
 	ids := make([]uint64, 0, len(basketData.BasketItems))
-	productIdToQuantity := make(map[uint64]uint64, len(basketData.BasketItems))
+	productIdToQuantity := make(map[uint64]uint64)
 	for _, elem := range basketData.BasketItems {
 		ids = append(ids, elem.Id)
 		productIdToQuantity[elem.Id] = elem.Quantity
@@ -104,7 +103,6 @@ func (s *GatewayService) BasketInfo(ctx context.Context, userId uint64) ([]*mode
 		}
 		productsInBasket = append(productsInBasket, p)
 	}
-
 	return productsInBasket, nil
 }
 

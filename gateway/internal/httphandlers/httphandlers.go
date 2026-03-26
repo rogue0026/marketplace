@@ -140,3 +140,38 @@ func BasketInfoHandler(s *service.GatewayService) http.HandlerFunc {
 
 	return http.HandlerFunc(h)
 }
+
+func AddProductToBasketHandler(s *service.GatewayService) http.HandlerFunc {
+	type Request struct {
+		UserId          uint64 `json:"user_id"`
+		ProductId       uint64 `json:"product_id"`
+		ProductQuantity uint64 `json:"product_quantity"`
+	}
+
+	h := func(w http.ResponseWriter, r *http.Request) {
+		req := Request{}
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		err = s.AddProductToBasket(r.Context(), req.UserId, req.ProductId, req.ProductQuantity)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		resp := map[string]string{
+			"status": "ok",
+		}
+		data, err := json.Marshal(&resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	}
+
+	return http.HandlerFunc(h)
+}

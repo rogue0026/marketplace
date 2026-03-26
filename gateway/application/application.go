@@ -28,18 +28,19 @@ func New() (*Application, error) {
 		return nil, err
 	}
 
-	clients, err := clients.New(clientsConfig)
+	c, err := clients.New(clientsConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	svc := service.NewGatewayService(clients)
+	svc := service.NewGatewayService(c)
 
 	mux := chi.NewRouter()
 	mux.Get("/products", httphandlers.ProductCatalogHandler(svc))
 	mux.Post("/users", httphandlers.CreateUserHandler(svc))
 	mux.Delete("/users", httphandlers.DeleteUserHandler(svc))
 	mux.Get("/users/basket", httphandlers.BasketInfoHandler(svc))
+	mux.Post("/users/basket", httphandlers.AddProductToBasketHandler(svc))
 
 	s := &http.Server{
 		Addr:    httpServerConfig.Addr,

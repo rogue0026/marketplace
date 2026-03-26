@@ -85,14 +85,14 @@ func (repo *BasketsRepo) GetUserBasket(ctx context.Context, userId uint64) (*mod
 
 	products := make([]*models.Product, 0)
 	for rows.Next() {
-		p := &models.Product{}
+		p := models.Product{}
 		if err := rows.Scan(
-			p.Id,
-			p.Quantity,
+			&p.Id,
+			&p.Quantity,
 		); err != nil {
 			return nil, err
 		}
-		products = append(products, p)
+		products = append(products, &p)
 	}
 
 	basket := &models.UserBasketInfo{
