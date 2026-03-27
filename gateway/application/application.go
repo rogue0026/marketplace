@@ -6,7 +6,9 @@ import (
 	"gateway/internal/clients"
 	"gateway/internal/config"
 	"gateway/internal/httphandlers"
+	"gateway/internal/middleware"
 	"gateway/internal/service"
+	"gateway/pkg/logger"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -17,6 +19,8 @@ type Application struct {
 }
 
 func New() (*Application, error) {
+	appLogger := logger.New()
+	logMiddleware := middleware.LogginMiddleware(appLogger)
 
 	clientsConfig, err := config.LoadGRPCClientsConfig()
 	if err != nil {
@@ -44,7 +48,7 @@ func New() (*Application, error) {
 
 	s := &http.Server{
 		Addr:    httpServerConfig.Addr,
-		Handler: mux,
+		Handler: logMiddleware(mux),
 	}
 
 	app := &Application{

@@ -14,7 +14,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(os.Getenv("DATABASE_URL"))
+	// fmt.Println(os.Getenv("DATABASE_URL"))
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
