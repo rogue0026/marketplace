@@ -20,7 +20,7 @@ type Application struct {
 
 func New() (*Application, error) {
 	appLogger := logger.New()
-	logMiddleware := middleware.LogginMiddleware(appLogger)
+	mw := middleware.LoggingMiddleware(appLogger)
 
 	clientsConfig, err := config.LoadGRPCClientsConfig()
 	if err != nil {
@@ -48,7 +48,7 @@ func New() (*Application, error) {
 
 	s := &http.Server{
 		Addr:    httpServerConfig.Addr,
-		Handler: logMiddleware(mux),
+		Handler: mw(mux),
 	}
 
 	app := &Application{

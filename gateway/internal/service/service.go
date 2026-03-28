@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"gateway/internal/clients"
 	"gateway/internal/models"
 
@@ -28,7 +29,7 @@ func (s *GatewayService) ProductCatalog(ctx context.Context, pageNumber uint64, 
 
 	resp, err := s.c.ProductsClient.ShowProducts(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch data from product service: %w", err)
 	}
 
 	result := make([]*models.Product, 0, len(resp.Products))
@@ -53,7 +54,7 @@ func (s *GatewayService) NewUser(ctx context.Context, login string, password str
 		Password: password,
 	})
 	if err != nil {
-		return userId, err
+		return userId, fmt.Errorf("failed to fetch data from users service: %w", err)
 	}
 
 	userId = resp.UserId
@@ -64,19 +65,18 @@ func (s *GatewayService) NewUser(ctx context.Context, login string, password str
 func (s *GatewayService) DeleteUser(ctx context.Context, userId uint64) error {
 	_, err := s.c.UsersClient.DeleteUser(ctx, &users.DeleteUserRequest{UserId: userId})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete user with user_id=%d: %w", userId, err)
 	}
 
 	return nil
 }
 
 func (s *GatewayService) BasketInfo(ctx context.Context, userId uint64) ([]*models.Product, error) {
-
 	basketData, err := s.c.UsersClient.GetProductsFromBasket(ctx, &users.GetProductsFromBasketRequest{
 		UserId: userId,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch basket for user_id=%d: %w", userId, err)
 	}
 
 	ids := make([]uint64, 0, len(basketData.BasketItems))
@@ -90,7 +90,7 @@ func (s *GatewayService) BasketInfo(ctx context.Context, userId uint64) ([]*mode
 		Ids: ids,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch product details for user_id=%d: %w", userId, err)
 	}
 
 	productsInBasket := make([]*models.Product, 0)
@@ -113,7 +113,13 @@ func (s *GatewayService) AddProductToBasket(ctx context.Context, userId uint64, 
 		ProductQuantity: quantity,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"failed to add product to basket, user_id=%d, product_id=%d, quantity=%d: %w",
+			userId,
+			productId,
+			quantity,
+			err,
+		)
 	}
 
 	return nil

@@ -1,34 +1,30 @@
 package middleware
 
 import (
-	"gateway/pkg/logger"
+	"context"
+	"github.com/google/uuid"
 	"log/slog"
 	"net/http"
 	"time"
-
-	"github.com/google/uuid"
 )
 
-type logKey struct{}
-
-func LogginMiddleware(base *slog.Logger) func(http.Handler) http.Handler {
+func LoggingMiddleware(base *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			requestId := uuid.New()
+			requestId := uuid.New().String()
 
-			l := base.With(
-				"request_id", requestId,
-				"method", r.Method,
-				"path", r.URL.Path,
+			logger := base.With(
+				slog.String("request_id", requestId),
+				slog.String("method", r.Method),
+				slog.String("path", r.URL.Path),
 			)
 
-			ctx := logger.WithContext(r.Context(), l)
+			ctx := context.WithValue(r.Context(), "logger", logger)
 
 			start := time.Now()
-
 			next.ServeHTTP(w, r.WithContext(ctx))
+			logger.Info("request finished", slog.String("duration", time.Since(start).String()))
 
-			l.Info("request completed", "duration", time.Since(start))
 		})
 	}
 }
