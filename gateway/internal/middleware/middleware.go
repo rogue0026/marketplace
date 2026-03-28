@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func LoggingMiddleware(base *slog.Logger) func(http.Handler) http.Handler {
@@ -20,7 +21,7 @@ func LoggingMiddleware(base *slog.Logger) func(http.Handler) http.Handler {
 			)
 
 			ctx := context.WithValue(r.Context(), "logger", logger)
-
+			ctx = context.WithValue(ctx, "request_id", requestId)
 			start := time.Now()
 			next.ServeHTTP(w, r.WithContext(ctx))
 			logger.Info("request finished", slog.String("duration", time.Since(start).String()))

@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"fmt"
 	"product_service/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -75,7 +76,7 @@ func NewProductsRepo(pool *pgxpool.Pool) *ProductsRepo {
 func (r *ProductsRepo) AddProduct(ctx context.Context, p *models.Product) error {
 	_, err := r.pool.Exec(ctx, AddProductsQuery, p.Name, p.StockRemaining, p.PricePerUnit)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to add product with name=%s: %w", p.Name, err)
 	}
 	return nil
 }
@@ -85,7 +86,11 @@ func (r *ProductsRepo) ProductList(ctx context.Context, pageNumber uint64, items
 
 	rows, err := r.pool.Query(ctx, GetProductsQuery, itemsPerPage, offset)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get product catalog with page=%d, items_on_page=%d: %w",
+			pageNumber,
+			itemsPerPage,
+			err,
+		)
 	}
 
 	products := make([]*models.Product, 0)
@@ -117,11 +122,12 @@ func (r *ProductsRepo) ProductsById(ctx context.Context, ids []uint64) ([]*model
 		ids,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch products by list ids %v: %w", ids, err)
 	}
 	defer rows.Close()
 
 	result := make([]*models.Product, 0)
+	var idx int
 	for rows.Next() {
 		p := models.Product{}
 		err = rows.Scan(
@@ -130,8 +136,9 @@ func (r *ProductsRepo) ProductsById(ctx context.Context, ids []uint64) ([]*model
 			&p.PricePerUnit,
 		)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan rows into product struct at idx=%d: %w", idx, err)
 		}
+		idx++
 		result = append(result, &p)
 	}
 
@@ -145,21 +152,21 @@ func (r *ProductsRepo) ProductsById(ctx context.Context, ids []uint64) ([]*model
 
 func (r *ProductsRepo) ToUpProductQuantity(ctx context.Context, amount uint64, productId uint64) error {
 	if _, err := r.pool.Exec(ctx, ToUpProductsQuantityQuery, amount, productId); err != nil {
-		return err
+		return fmt.Errorf("failed to increase product with product_id=%d by %d units: %w", productId, amount, err)
 	}
 	return nil
 }
 
 func (r *ProductsRepo) ToDownProductQuantity(ctx context.Context, amount uint64, productId uint64) error {
 	if _, err := r.pool.Exec(ctx, ToDownProductsQuantityQuery, amount, productId); err != nil {
-		return err
+		return fmt.Errorf("failed to decrease product with product_id=%d by %d units: %w", productId, amount, err)
 	}
 	return nil
 }
 
 func (r *ProductsRepo) DeleteProduct(ctx context.Context, productId uint64) error {
 	if _, err := r.pool.Exec(ctx, DeleteProductQuery, productId); err != nil {
-		return err
+		return fmt.Errorf("failed to delete product with product_id=%d: %w", productId, err)
 	}
 
 	return nil
@@ -175,18 +182,23 @@ func (r *ProductsRepo) ReserveProducts(ctx context.Context, reservations []*mode
 	for _, r := range reservations {
 		_, err = tx.Exec(ctx, ReserveProductQuery, r.OrderId, r.ProductId, r.Quantity)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to reserve product with product_id=%d: %w", r.ProductId, err)
 		}
 
 		_, err = tx.Exec(ctx, ToDownProductsQuantityQuery, r.Quantity, r.ProductId)
 		if err != nil {
-			return err
+			return fmt.Errorf(
+				"failed to decrease product with product_id=%d by %d units: %w",
+				r.ProductId,
+				r.Quantity,
+				err,
+			)
 		}
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to commit transaction while product reservation: %w", err)
 	}
 
 	return nil
@@ -205,7 +217,7 @@ func (r *ProductsRepo) CancelReservationForOrder(ctx context.Context, orderId ui
 		orderId,
 	)
 	if err != nil {
-		return err
+		return err // todo add error context
 	}
 	for rows.Next() {
 		var productId uint64

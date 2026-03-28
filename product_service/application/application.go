@@ -7,6 +7,8 @@ import (
 	"product_service/internal/config"
 	"product_service/internal/service"
 	"product_service/internal/storage/pg"
+	"product_service/internal/transport/interceptors"
+	"product_service/pkg/logger"
 	"product_service/pkg/postgres"
 
 	"product_service/internal/transport/grpcapi"
@@ -38,8 +40,11 @@ func New() (*Application, error) {
 	products := pg.NewProductsRepo(pool)
 	userService := service.NewProductService(products)
 
-	var serverOpts []grpc.ServerOption
-	grpcServer := grpc.NewServer(serverOpts...)
+	appLogger := logger.New()
+
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptors.Logging(appLogger)),
+	)
 
 	h := grpcapi.NewProductHandler(userService)
 

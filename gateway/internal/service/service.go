@@ -26,7 +26,7 @@ func (s *GatewayService) ProductCatalog(ctx context.Context, pageNumber uint64, 
 		PageNumber:   pageNumber,
 		ItemsPerPage: itemsPerPage,
 	}
-
+	
 	resp, err := s.c.ProductsClient.ShowProducts(ctx, req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch data from product service: %w", err)

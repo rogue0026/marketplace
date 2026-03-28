@@ -2,8 +2,10 @@ package grpcapi
 
 import (
 	"context"
+	"log/slog"
 	"product_service/internal/models"
 	"product_service/internal/service"
+	"product_service/pkg/logger"
 
 	pb "github.com/rogue0026/marketplace-proto/products"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -23,8 +25,13 @@ func NewProductHandler(s *service.ProductService) *ProductHandler {
 }
 
 func (h *ProductHandler) ShowProducts(ctx context.Context, req *pb.ShowProductsRequest) (*pb.ShowProductsResponse, error) {
+	appLogger := logger.Extract(ctx)
 	products, err := h.s.ShowProducts(ctx, req.PageNumber, req.ItemsPerPage)
 	if err != nil {
+		appLogger.Error(
+			"error while request for product catalog",
+			slog.String("reason", err.Error()),
+		)
 		return nil, err
 	}
 	pbProducts := make([]*pb.Product, 0)

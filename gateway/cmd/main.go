@@ -27,7 +27,7 @@ func main() {
 	signal.Notify(stop, os.Interrupt)
 
 	app.Run()
-	fmt.Printf("starting api gateway")
+	fmt.Println("starting api gateway")
 	<-stop
 	app.Stop(context.Background())
 }
