@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"user_service/internal/models"
 
 	"golang.org/x/crypto/bcrypt"
@@ -27,7 +28,7 @@ func (s *UserService) CreateNewUser(ctx context.Context, user *models.User) (uin
 	plainPassword := user.PasswordHash
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to hash password for user with login=%s: %w", user.Username, err)
 	}
 
 	user.PasswordHash = string(hashedPassword)

@@ -8,6 +8,7 @@ import (
 	"order_service/internal/service"
 	"order_service/internal/storage/pg"
 	"order_service/internal/transport/grpcapi"
+	"order_service/pkg/logger"
 	"order_service/pkg/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,6 +17,7 @@ import (
 	pbusers "github.com/rogue0026/marketplace-proto/users"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"order_service/internal/transport/interceptors"
 )
 
 type Application struct {
@@ -60,8 +62,10 @@ func New() (*Application, error) {
 		return nil, err
 	}
 
-	var opts []grpc.ServerOption
-	grpcServer := grpc.NewServer(opts...)
+	appLogger := logger.New()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptors.Logging(appLogger)),
+	)
 
 	h := grpcapi.NewOrdersHandler(s)
 	pb.RegisterOrderServiceServer(grpcServer, h)

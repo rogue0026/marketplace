@@ -8,6 +8,8 @@ import (
 	"user_service/internal/service"
 	"user_service/internal/storage/pg"
 	"user_service/internal/transport/grpcapi"
+	"user_service/internal/transport/interceptors"
+	"user_service/pkg/logger"
 	"user_service/pkg/postgres"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -42,8 +44,11 @@ func New() (*Application, error) {
 
 	h := grpcapi.NewHandler(userService)
 
-	var opts []grpc.ServerOption
-	grpcServer := grpc.NewServer(opts...)
+	appLogger := logger.New()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptors.Logging(appLogger)),
+	)
+
 	pb.RegisterUserServiceServer(grpcServer, h)
 
 	l, err := net.Listen("tcp", appConfig.GRPCAddr)
@@ -62,7 +67,6 @@ func New() (*Application, error) {
 }
 
 func (a *Application) Run() {
-	// todo
 	go func() {
 		err := a.grpcServer.Serve(a.tcpListener)
 		if err != nil {

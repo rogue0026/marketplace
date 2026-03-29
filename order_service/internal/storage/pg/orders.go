@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"fmt"
 	"order_service/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -73,7 +74,7 @@ func (r *OrdersRepo) CreateOrder(ctx context.Context, o *models.Order) (uint64, 
 		StatusWaitingForPayment,
 	).Scan(&orderId)
 	if err != nil {
-		return orderId, err
+		return orderId, fmt.Errorf("failed to create new order for user with user_id=%d: %w", o.UserId, err)
 	}
 
 	for _, orderItem := range o.Items {
@@ -86,13 +87,24 @@ func (r *OrdersRepo) CreateOrder(ctx context.Context, o *models.Order) (uint64, 
 			orderItem.PricePerUnit,
 		)
 		if err != nil {
-			return orderId, err
+			return orderId, fmt.Errorf(
+				"failed to add order content, order_id=%d, product_id=%d, quantity=%d, price=%d: %w",
+				orderId,
+				orderItem.ProductId,
+				orderItem.Quantity,
+				orderItem.PricePerUnit,
+				err,
+			)
 		}
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return orderId, err
+		return orderId, fmt.Errorf(
+			"failed to commit transaction while adding order content for order with order_id=%d: %w",
+			orderId,
+			err,
+		)
 	}
 
 	return orderId, nil
@@ -107,7 +119,7 @@ func (r *OrdersRepo) GetOrderInfo(ctx context.Context, orderId uint64) (*models.
 		orderId,
 	).Scan(&userId, &totalPrice)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get generalized info about order with order_id=%d: %w", orderId, err)
 	}
 
 	rows, err := r.pool.Query(
@@ -116,7 +128,7 @@ func (r *OrdersRepo) GetOrderInfo(ctx context.Context, orderId uint64) (*models.
 		orderId,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch order content info about order with order_id=%d: %w", orderId, err)
 	}
 	defer rows.Close()
 
@@ -130,7 +142,7 @@ func (r *OrdersRepo) GetOrderInfo(ctx context.Context, orderId uint64) (*models.
 			&item.PricePerUnit,
 		)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan row while fetching order content: %w", err)
 		}
 
 		orderItems = append(orderItems, &item)
@@ -154,7 +166,7 @@ func (r *OrdersRepo) ChangeOrderStatus(ctx context.Context, orderId uint64, stat
 		status,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to change order status: %w", err)
 	}
 
 	return nil

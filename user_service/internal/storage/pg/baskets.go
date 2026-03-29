@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"fmt"
 	"user_service/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -52,7 +53,7 @@ func (repo *BasketsRepo) AddProductToBasket(ctx context.Context, userId uint64, 
 		p.Quantity,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to add product to basket for user with user_id=%d: %w", userId, err)
 	}
 
 	return nil
@@ -66,7 +67,7 @@ func (repo *BasketsRepo) DeleteProductFromBasket(ctx context.Context, userId uin
 		productId,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete product from basket for user with user_id=%d: %w", userId, err)
 	}
 
 	return nil
@@ -79,7 +80,7 @@ func (repo *BasketsRepo) GetUserBasket(ctx context.Context, userId uint64) (*mod
 		userId,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch rows with basket info for user with user_id=%d: %w", userId, err)
 	}
 	defer rows.Close()
 
@@ -90,7 +91,7 @@ func (repo *BasketsRepo) GetUserBasket(ctx context.Context, userId uint64) (*mod
 			&p.Id,
 			&p.Quantity,
 		); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan row while getting user basket for user_id=%d: %w", userId, err)
 		}
 		products = append(products, &p)
 	}
@@ -105,7 +106,7 @@ func (repo *BasketsRepo) GetUserBasket(ctx context.Context, userId uint64) (*mod
 func (repo *BasketsRepo) ClearUserBasket(ctx context.Context, userId uint64) error {
 	_, err := repo.pool.Exec(ctx, ClearUserBasketQuery, userId)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to clear user basket for user_id=%d: %w", userId, err)
 	}
 
 	return nil

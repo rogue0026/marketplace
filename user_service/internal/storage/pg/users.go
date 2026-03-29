@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"fmt"
 	"user_service/internal/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -42,7 +43,7 @@ func (r *UsersRepo) CreateUser(ctx context.Context, user *models.User) (uint64, 
 		user.PasswordHash,
 	).Scan(&userId)
 	if err != nil {
-		return userId, err
+		return userId, fmt.Errorf("failed to create user with login=%s: %w", user.Username, err)
 	}
 
 	return userId, nil
@@ -55,7 +56,7 @@ func (r *UsersRepo) DeleteUser(ctx context.Context, userId uint64) error {
 	`
 	_, err := r.pool.Exec(ctx, sqlQuery, userId)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete user with user_id=%d: %w", userId, err)
 	}
 
 	return nil

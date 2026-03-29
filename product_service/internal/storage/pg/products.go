@@ -207,7 +207,11 @@ func (r *ProductsRepo) ReserveProducts(ctx context.Context, reservations []*mode
 func (r *ProductsRepo) CancelReservationForOrder(ctx context.Context, orderId uint64) error {
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"error while beginning transaction while cancelling reservation for order_id=%d: %w",
+			orderId,
+			err,
+		)
 	}
 	defer tx.Rollback(ctx)
 
@@ -217,36 +221,61 @@ func (r *ProductsRepo) CancelReservationForOrder(ctx context.Context, orderId ui
 		orderId,
 	)
 	if err != nil {
-		return err // todo add error context
+		return fmt.Errorf(
+			"failed to get records while cancelling reservation for order_id=%d: %w",
+			orderId,
+			err,
+		)
 	}
+
 	for rows.Next() {
 		var productId uint64
 		var quantity uint64
 		err := rows.Scan(&productId, &quantity)
 		if err != nil {
-			return err
+			return fmt.Errorf(
+				"failed to scan product_id and quantity while cancelling reservation for order_id=%d: %w",
+				orderId,
+				err,
+			)
 		}
 
 		_, err = tx.Exec(ctx, ToUpProductsQuantityQuery, quantity, productId)
 		if err != nil {
-			return err
+			return fmt.Errorf(
+				"failed to increase product quantity while cancelling reservation for order_id=%d: %w",
+				orderId,
+				err,
+			)
 		}
 
 	}
 
 	err = rows.Err()
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"failed to extract reservation rows while cancelling reservation for order_id=%d: %w",
+			orderId,
+			err,
+		)
 	}
 
 	_, err = tx.Exec(ctx, DeleteOrderReservationsQuery, orderId)
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"failed to delete order reservations for order_id=%d while cancelling reservation for order: %w",
+			orderId,
+			err,
+		)
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"failed to commit transaction while cancelling reservation for order_id=%d: %w",
+			orderId,
+			err,
+		)
 	}
 
 	return nil
@@ -259,7 +288,7 @@ func (r *ProductsRepo) DeleteReservationsForOrder(ctx context.Context, orderId u
 		orderId,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete reservations fo order_id=%d: %w", orderId, err)
 	}
 
 	return nil

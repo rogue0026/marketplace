@@ -52,8 +52,13 @@ func (h *ProductHandler) ShowProducts(ctx context.Context, req *pb.ShowProductsR
 }
 
 func (h *ProductHandler) ShowProductsByIds(ctx context.Context, req *pb.ShowProductsByIdsRequest) (*pb.ShowProductsResponse, error) {
+	appLogger := logger.Extract(ctx)
 	products, err := h.s.ProductsByIds(ctx, req.Ids)
 	if err != nil {
+		appLogger.Error(
+			"failed to show products by ids list",
+			slog.String("reason", err.Error()),
+		)
 		return nil, err
 	}
 
@@ -73,6 +78,7 @@ func (h *ProductHandler) ShowProductsByIds(ctx context.Context, req *pb.ShowProd
 }
 
 func (h *ProductHandler) AddProduct(ctx context.Context, req *pb.AddProductRequest) (*pb.AddProductResponse, error) {
+	appLogger := logger.Extract(ctx)
 	p := &models.Product{
 		Name:           req.Name,
 		PricePerUnit:   req.CurrentPrice,
@@ -80,6 +86,10 @@ func (h *ProductHandler) AddProduct(ctx context.Context, req *pb.AddProductReque
 	}
 	err := h.s.AddProduct(ctx, p)
 	if err != nil {
+		appLogger.Error(
+			"failed to add product to stock",
+			slog.String("reason", err.Error()),
+		)
 		return nil, err
 	}
 
@@ -87,8 +97,13 @@ func (h *ProductHandler) AddProduct(ctx context.Context, req *pb.AddProductReque
 }
 
 func (h *ProductHandler) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest) (*emptypb.Empty, error) {
+	appLogger := logger.Extract(ctx)
 	err := h.s.DeleteProduct(ctx, req.ProductId)
 	if err != nil {
+		appLogger.Error(
+			"failed to delete product from stock",
+			slog.String("reason", err.Error()),
+		)
 		return nil, err
 	}
 
@@ -96,8 +111,13 @@ func (h *ProductHandler) DeleteProduct(ctx context.Context, req *pb.DeleteProduc
 }
 
 func (h *ProductHandler) IncreaseProductQuantity(ctx context.Context, req *pb.IncreaseProductRequest) (*emptypb.Empty, error) {
+	appLogger := logger.Extract(ctx)
 	err := h.s.ToUpProductQuantity(ctx, req.ProductId, req.Amount)
 	if err != nil {
+		appLogger.Error(
+			"failed to increase product quantity",
+			slog.String("reason", err.Error()),
+		)
 		return nil, err
 	}
 
@@ -105,8 +125,13 @@ func (h *ProductHandler) IncreaseProductQuantity(ctx context.Context, req *pb.In
 }
 
 func (h *ProductHandler) DecreaseProductQuantity(ctx context.Context, req *pb.DecreaseProductRequest) (*emptypb.Empty, error) {
+	appLogger := logger.Extract(ctx)
 	err := h.s.ToDownProductQuantity(ctx, req.ProductId, req.Amount)
 	if err != nil {
+		appLogger.Error(
+			"failed to decrease product quantity",
+			slog.String("reason", err.Error()),
+		)
 		return nil, err
 	}
 
@@ -114,6 +139,8 @@ func (h *ProductHandler) DecreaseProductQuantity(ctx context.Context, req *pb.De
 }
 
 func (h *ProductHandler) ReserveProducts(ctx context.Context, req *pb.ReserveProductsRequest) (*emptypb.Empty, error) {
+	appLogger := logger.Extract(ctx)
+
 	reservations := make([]*models.Reservation, 0)
 	for _, elem := range req.Reservations {
 		r := &models.Reservation{
@@ -126,6 +153,10 @@ func (h *ProductHandler) ReserveProducts(ctx context.Context, req *pb.ReservePro
 
 	err := h.s.ReserveProducts(ctx, reservations)
 	if err != nil {
+		appLogger.Error(
+			"failed to reserve products",
+			slog.String("reason", err.Error()),
+		)
 		return nil, err
 	}
 
@@ -133,8 +164,13 @@ func (h *ProductHandler) ReserveProducts(ctx context.Context, req *pb.ReservePro
 }
 
 func (h *ProductHandler) CancelReservation(ctx context.Context, req *pb.CancelReservationRequest) (*emptypb.Empty, error) {
+	appLogger := logger.Extract(ctx)
 	err := h.s.CancelReservationsForOrder(ctx, req.OrderId)
 	if err != nil {
+		appLogger.Error(
+			"failed to cancel product reservation",
+			slog.Uint64("order_id", req.OrderId),
+		)
 		return nil, err
 	}
 
@@ -142,8 +178,14 @@ func (h *ProductHandler) CancelReservation(ctx context.Context, req *pb.CancelRe
 }
 
 func (h *ProductHandler) DeleteReservation(ctx context.Context, req *pb.DeleteReservationRequest) (*emptypb.Empty, error) {
+	appLogger := logger.Extract(ctx)
+
 	err := h.s.DeleteReservationsForOrder(ctx, req.OrderId)
 	if err != nil {
+		appLogger.Error(
+			"failed to delete product reservation",
+			slog.Uint64("order_id", req.OrderId),
+		)
 		return nil, err
 	}
 
